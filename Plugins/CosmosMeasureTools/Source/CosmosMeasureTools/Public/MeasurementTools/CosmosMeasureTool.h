@@ -39,6 +39,14 @@ protected:
 	// 预览鼠标位置的点
 	UFUNCTION(Category = "Cosmos Measurement Tools")
 	void PreviewLastPoint();
+	// 预览鼠标位置的点的位置(世界)
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector PreviewPointLocation;
+	// 预览鼠标位置的点的变换(相对)
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FTransform PreviewPointRelativeTransform;
+
+	TArray<UCosmosMeasureToolSphereComponent*> MeasuringPoints;
 
 public:
 	// Called every frame
@@ -53,4 +61,8 @@ public:
 	/* 结束测量 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
 	void StopMeasuring();
+
+	/* 添加测量点 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
+	void AddMeasuringPoint();
 };

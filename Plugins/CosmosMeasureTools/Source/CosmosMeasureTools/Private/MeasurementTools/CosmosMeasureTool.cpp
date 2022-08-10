@@ -16,6 +16,8 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 	RootComponent = Root;
 	PreviewSphere = CreateDefaultSubobject<UCosmosMeasureToolSphereComponent>(TEXT("PreviewSphere"));
 	PreviewSphere->SetupAttachment(RootComponent);
+	PreviewSphere->SetVisibility(false);
+	PreviewSphere->SetRelativeScale3D(FVector(0.1f));
 }
 
 // Called when the game starts or when spawned
@@ -44,7 +46,8 @@ void ACosmosMeasureTool::PreviewLastPoint()
 			                                         ECC_Visibility,
 			                                         Params))
 			{
-				SetActorLocation(HitResult.Location);
+				PreviewPointLocation = HitResult.Location;
+				PreviewSphere->SetWorldLocation(PreviewPointLocation);
 			}
 		}
 	}
@@ -66,11 +69,36 @@ void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
 	bMeasuring = true;
 	bTraceComplex = bMeasureComplex;
 	TraceDistance = Distance;
+	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
 }
 
 void ACosmosMeasureTool::StopMeasuring()
 {
 	bMeasuring = false;
+	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
+
+	for(const auto &Point : MeasuringPoints)
+	{
+		Point->DestroyComponent();
+	}
+	MeasuringPoints.Empty();
+}
+
+void ACosmosMeasureTool::AddMeasuringPoint()
+{
+	if (bMeasuring)
+	{
+		PreviewPointRelativeTransform = FTransform(
+			FRotator::ZeroRotator,
+			GetActorTransform().InverseTransformPosition(PreviewPointLocation),
+			FVector(0.1f)
+		);
+		UCosmosMeasureToolSphereComponent* Point = NewObject<UCosmosMeasureToolSphereComponent>(this);
+		Point->AttachToComponent(RootComponent,FAttachmentTransformRules::KeepRelativeTransform);
+		Point->SetRelativeTransform(PreviewPointRelativeTransform);
+		Point->RegisterComponent();
+		MeasuringPoints.Add(Point); // 数组保存
+	}
 }
