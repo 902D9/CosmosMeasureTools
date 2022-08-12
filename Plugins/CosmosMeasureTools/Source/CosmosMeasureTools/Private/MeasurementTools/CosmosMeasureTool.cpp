@@ -50,8 +50,8 @@ void ACosmosMeasureTool::PreviewLastPoint()
 			{
 				PreviewPointLocation = HitResult.Location;
 				PreviewPointRelativeLocation = GetActorTransform().InverseTransformPosition(PreviewPointLocation),
-				PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
-				if(PreviewCable)
+					PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
+				if (PreviewCable)
 				{
 					PreviewCable->EndLocation = PreviewPointRelativeLocation;
 				}
@@ -68,7 +68,8 @@ void ACosmosMeasureTool::CreateCable()
 		MeasuringCables.Add(PreviewCable);
 	}
 	PreviewCable = NewObject<UCosmosMeasureToolCableComponent>(this);
-	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform);
+	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform); // 设置起始位置
+	PreviewCable->SetMaxScaleDistance(TraceDistance); // 设置缩放生效范围
 	PreviewCable->RegisterComponent();
 }
 
@@ -90,6 +91,12 @@ void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
 	TraceDistance = Distance;
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
+
+	// 更新已存在Cable缩放距离
+	for (auto& MeasuringCable : MeasuringCables)
+	{
+		MeasuringCable->SetMaxScaleDistance(TraceDistance);
+	}
 }
 
 void ACosmosMeasureTool::StopMeasuring()
@@ -97,7 +104,7 @@ void ACosmosMeasureTool::StopMeasuring()
 	bMeasuring = false;
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
-	if(PreviewCable)
+	if (PreviewCable)
 	{
 		PreviewCable->DestroyComponent();
 	}

@@ -70,16 +70,16 @@ public:
 	 * @param Distance 测量时射线检测距离
 	 **/
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	void StartMeasuring(bool bMeasureComplex, float Distance = 2000.0f);
+	virtual void StartMeasuring(bool bMeasureComplex, float Distance = 2000.0f);
 	/* 结束测量 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	void StopMeasuring();
+	virtual void StopMeasuring();
 
 	/* 清除 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	void ClearAll();
+	virtual void ClearAll();
 
 	/* 添加测量点 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	void AddMeasuringPoint();
+	virtual void AddMeasuringPoint();
 };
