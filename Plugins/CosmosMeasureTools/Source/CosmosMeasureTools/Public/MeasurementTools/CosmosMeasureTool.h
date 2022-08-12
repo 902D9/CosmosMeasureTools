@@ -7,6 +7,7 @@
 #include "CosmosMeasureTool.generated.h"
 
 class UCosmosMeasureToolSphereComponent;
+class UCosmosMeasureToolCableComponent;
 
 UCLASS(Blueprintable, ClassGroup="Cosmos Measurement Tools")
 class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public AActor
@@ -42,11 +43,23 @@ protected:
 	// 预览鼠标位置的点的位置(世界)
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	FVector PreviewPointLocation;
+	// 预览鼠标位置的点的位置(相对)
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector PreviewPointRelativeLocation;
 	// 预览鼠标位置的点的变换(相对)
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	FTransform PreviewPointRelativeTransform;
-
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	TArray<UCosmosMeasureToolSphereComponent*> MeasuringPoints;
+
+	/* 添加测量点间连线 */
+	UFUNCTION(Category = "Cosmos Measurement Tools")
+	void CreateCable();
+	// 预览测量点间连线
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	UCosmosMeasureToolCableComponent* PreviewCable;
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	TArray<UCosmosMeasureToolCableComponent*> MeasuringCables;
 
 public:
 	// Called every frame
@@ -61,6 +74,10 @@ public:
 	/* 结束测量 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
 	void StopMeasuring();
+
+	/* 清除 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
+	void ClearAll();
 
 	/* 添加测量点 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")

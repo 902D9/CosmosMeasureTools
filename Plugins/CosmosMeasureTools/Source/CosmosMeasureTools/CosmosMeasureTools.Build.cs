@@ -25,7 +25,7 @@ public class CosmosMeasureTools : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core", "CableComponent",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

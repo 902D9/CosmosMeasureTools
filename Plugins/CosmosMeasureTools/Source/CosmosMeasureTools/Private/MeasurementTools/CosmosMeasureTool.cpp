@@ -3,6 +3,7 @@
 
 #include "MeasurementTools/CosmosMeasureTool.h"
 #include "Kismet/GameplayStatics.h"
+#include "MeasurementTools/CosmosMeasureToolCableComponent.h"
 #include "MeasurementTools/CosmosMeasureToolSphereComponent.h"
 
 // Sets default values
@@ -33,6 +34,7 @@ void ACosmosMeasureTool::PreviewLastPoint()
 	{
 		FVector WorldLocation;
 		FVector WorldDirection;
+		// 射线检测 更新 预览位置
 		if (PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
 		{
 			FHitResult HitResult;
@@ -47,10 +49,27 @@ void ACosmosMeasureTool::PreviewLastPoint()
 			                                         Params))
 			{
 				PreviewPointLocation = HitResult.Location;
-				PreviewSphere->SetWorldLocation(PreviewPointLocation);
+				PreviewPointRelativeLocation = GetActorTransform().InverseTransformPosition(PreviewPointLocation),
+				PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
+				if(PreviewCable)
+				{
+					PreviewCable->EndLocation = PreviewPointRelativeLocation;
+				}
 			}
 		}
 	}
+}
+
+void ACosmosMeasureTool::CreateCable()
+{
+	// 如果存在连线，则先保存
+	if (PreviewCable)
+	{
+		MeasuringCables.Add(PreviewCable);
+	}
+	PreviewCable = NewObject<UCosmosMeasureToolCableComponent>(this);
+	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform);
+	PreviewCable->RegisterComponent();
 }
 
 // Called every frame
@@ -78,8 +97,16 @@ void ACosmosMeasureTool::StopMeasuring()
 	bMeasuring = false;
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
+	if(PreviewCable)
+	{
+		PreviewCable->DestroyComponent();
+	}
+}
 
-	for(const auto &Point : MeasuringPoints)
+void ACosmosMeasureTool::ClearAll()
+{
+	StopMeasuring();
+	for (const auto& Point : MeasuringPoints)
 	{
 		Point->DestroyComponent();
 	}
@@ -92,13 +119,14 @@ void ACosmosMeasureTool::AddMeasuringPoint()
 	{
 		PreviewPointRelativeTransform = FTransform(
 			FRotator::ZeroRotator,
-			GetActorTransform().InverseTransformPosition(PreviewPointLocation),
+			PreviewPointRelativeLocation,
 			FVector(0.1f)
 		);
 		UCosmosMeasureToolSphereComponent* Point = NewObject<UCosmosMeasureToolSphereComponent>(this);
-		Point->AttachToComponent(RootComponent,FAttachmentTransformRules::KeepRelativeTransform);
+		Point->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		Point->SetRelativeTransform(PreviewPointRelativeTransform);
 		Point->RegisterComponent();
 		MeasuringPoints.Add(Point); // 数组保存
+		CreateCable();
 	}
 }
