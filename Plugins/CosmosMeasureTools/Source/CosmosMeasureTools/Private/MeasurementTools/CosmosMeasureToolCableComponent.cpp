@@ -8,10 +8,12 @@
 
 UCosmosMeasureToolCableComponent::UCosmosMeasureToolCableComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
+	
 	bEnableScaleByDistance = true;
-	MinScaleDistance = 2300.0f;
+	MinScaleDistance = 1000.0f;
 	MaxScaleDistance = 3000.0f;
-	BaseCableScale = 20.0f;
+	BaseCableScale = 80.0f;
 
 	EndLocation = FVector::ZeroVector;
 	CableLength = 1.0f;
@@ -42,6 +44,7 @@ void UCosmosMeasureToolCableComponent::ScaleCableByDistanceToCamera()
 			MaxScaleDistance, BaseCableScale, MaxScaleDistance / MinScaleDistance * BaseCableScale);
 		// SetRelativeScale3D(WidgetScale * FVector::OneVector);
 		CableWidth = Scale;
+		UE_LOG(LogTemp, Log, TEXT("Cable Width %f"), CableWidth);
 		SendRenderDynamicData_Concurrent();
 	}
 }
@@ -50,7 +53,7 @@ void UCosmosMeasureToolCableComponent::TickComponent(float DeltaTime, ELevelTick
                                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	ScaleCableByDistanceToCamera();
+	// ScaleCableByDistanceToCamera();
 }
 
 void UCosmosMeasureToolCableComponent::SetMaxScaleDistance(float NewMaxScaleDistance)

@@ -17,8 +17,36 @@ class COSMOSMEASURETOOLS_API UCosmosMeasureToolSphereComponent : public UStaticM
 public:
 	UCosmosMeasureToolSphereComponent();
 
+	virtual void BeginPlay() override;
+
 protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	APlayerController* PlayerController;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	bool bEnableScaleByDistance;
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	float MinScaleDistance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools",
+		meta=(EditCondition="bEnableScaleByDistance"))
+	float MaxScaleDistance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools",
+		meta=(EditCondition="bEnableScaleByDistance"))
+	float BaseScale;
+	
 private:
 	UPROPERTY()
 	UStaticMesh* MeshAsset;
+
+	// 根据距摄像头距离缩放
+	void ScaleByDistanceToCamera();
+
+public:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+							   FActorComponentTickFunction* ThisTickFunction) override;
+
+	// 设置新的缩放范围Max值
+	UFUNCTION()
+	void SetMaxScaleDistance(float NewMaxScaleDistance);
+
 };

@@ -19,6 +19,10 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 	PreviewSphere->SetupAttachment(RootComponent);
 	PreviewSphere->SetVisibility(false);
 	PreviewSphere->SetRelativeScale3D(FVector(0.1f));
+	if (Material)
+	{
+		PreviewSphere->SetMaterial(0, Material);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -70,6 +74,10 @@ void ACosmosMeasureTool::CreateCable()
 	PreviewCable = NewObject<UCosmosMeasureToolCableComponent>(this);
 	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform); // 设置起始位置
 	PreviewCable->SetMaxScaleDistance(TraceDistance); // 设置缩放生效范围
+	if (Material)
+	{
+		PreviewCable->SetMaterial(0, Material);
+	}
 	PreviewCable->RegisterComponent();
 }
 
@@ -89,6 +97,7 @@ void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
 	bMeasuring = true;
 	bTraceComplex = bMeasureComplex;
 	TraceDistance = Distance;
+	// UE_LOG(LogTemp, Log, TEXT("Trace Distance %f"), TraceDistance);
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
 
@@ -96,6 +105,12 @@ void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
 	for (auto& MeasuringCable : MeasuringCables)
 	{
 		MeasuringCable->SetMaxScaleDistance(TraceDistance);
+	}
+
+	PreviewSphere->SetMaxScaleDistance(TraceDistance);
+	for (auto& MeasuringPoint : MeasuringPoints)
+	{
+		MeasuringPoint->SetMaxScaleDistance(TraceDistance);
 	}
 }
 
@@ -133,6 +148,11 @@ void ACosmosMeasureTool::AddMeasuringPoint()
 		Point->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		Point->SetRelativeTransform(PreviewPointRelativeTransform);
 		Point->RegisterComponent();
+		Point->SetMaxScaleDistance(TraceDistance);
+		if (Material)
+		{
+			Point->SetMaterial(0, Material);
+		}
 		MeasuringPoints.Add(Point); // 数组保存
 		CreateCable();
 	}

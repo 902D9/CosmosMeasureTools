@@ -36,6 +36,9 @@ protected:
 	// 测量时射线检测距离
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	float TraceDistance;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	UMaterialInterface* Material;
 
 	// 预览鼠标位置的点
 	UFUNCTION(Category = "Cosmos Measurement Tools")
