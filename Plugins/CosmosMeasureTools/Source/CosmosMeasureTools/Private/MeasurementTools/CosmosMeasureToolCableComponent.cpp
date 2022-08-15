@@ -44,7 +44,7 @@ void UCosmosMeasureToolCableComponent::ScaleCableByDistanceToCamera()
 			MaxScaleDistance, BaseCableScale, MaxScaleDistance / MinScaleDistance * BaseCableScale);
 		// SetRelativeScale3D(WidgetScale * FVector::OneVector);
 		CableWidth = Scale;
-		UE_LOG(LogTemp, Log, TEXT("Cable Width %f"), CableWidth);
+		// UE_LOG(LogTemp, Log, TEXT("Cable Width %f"), CableWidth);
 		SendRenderDynamicData_Concurrent();
 	}
 }

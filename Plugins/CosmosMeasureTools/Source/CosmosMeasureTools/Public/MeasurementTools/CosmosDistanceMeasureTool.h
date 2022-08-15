@@ -27,7 +27,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void ClearAll() override;
-	virtual void AddMeasuringPoint() override;
+	virtual void ClearAll_Implementation() override;
+	virtual void AddMeasuringPoint_Implementation() override;
 
 };

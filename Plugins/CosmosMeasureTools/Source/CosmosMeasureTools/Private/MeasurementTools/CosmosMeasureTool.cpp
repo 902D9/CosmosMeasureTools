@@ -3,6 +3,7 @@
 
 #include "MeasurementTools/CosmosMeasureTool.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetArrayLibrary.h"
 #include "MeasurementTools/CosmosMeasureToolCableComponent.h"
 #include "MeasurementTools/CosmosMeasureToolSphereComponent.h"
 
@@ -125,7 +126,27 @@ void ACosmosMeasureTool::StopMeasuring()
 	}
 }
 
-void ACosmosMeasureTool::ClearAll()
+FVector ACosmosMeasureTool::GetMeasuringLocationAtIndex(float Index)
+{
+	if (MeasuringLocation.IsValidIndex(1) && Index != MeasuringLocation.Num() - 1)
+	{
+		const FVector PointOne = MeasuringLocation[Index];
+		const FVector PointTwo = MeasuringLocation[Index + 1];
+		return FVector(
+			(PointOne.X + PointTwo.X)/2,
+			(PointOne.Y + PointTwo.Y)/2,
+			(PointOne.Z + PointTwo.Z)/2
+			);
+	}
+	return FVector::ZeroVector;
+}
+
+FVector ACosmosMeasureTool::GetLastMeasuringLocation()
+{
+	return GetMeasuringLocationAtIndex(MeasuringLocation.Num() - 2);
+}
+
+void ACosmosMeasureTool::ClearAll_Implementation()
 {
 	StopMeasuring();
 	for (const auto& Point : MeasuringPoints)
@@ -135,7 +156,7 @@ void ACosmosMeasureTool::ClearAll()
 	MeasuringPoints.Empty();
 }
 
-void ACosmosMeasureTool::AddMeasuringPoint()
+void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 {
 	if (bMeasuring)
 	{
@@ -154,6 +175,7 @@ void ACosmosMeasureTool::AddMeasuringPoint()
 			Point->SetMaterial(0, Material);
 		}
 		MeasuringPoints.Add(Point); // 数组保存
+		MeasuringLocation.Add(Point->K2_GetComponentLocation());
 		CreateCable();
 	}
 }

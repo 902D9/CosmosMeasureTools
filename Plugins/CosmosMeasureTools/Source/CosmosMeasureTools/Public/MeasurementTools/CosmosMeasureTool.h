@@ -36,7 +36,7 @@ protected:
 	// 测量时射线检测距离
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	float TraceDistance;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	UMaterialInterface* Material;
 
@@ -54,6 +54,9 @@ protected:
 	FTransform PreviewPointRelativeTransform;
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	TArray<UCosmosMeasureToolSphereComponent*> MeasuringPoints;
+	// 测量位置
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	TArray<FVector> MeasuringLocation;
 
 	/* 添加测量点间连线 */
 	UFUNCTION(Category = "Cosmos Measurement Tools")
@@ -79,10 +82,18 @@ public:
 	virtual void StopMeasuring();
 
 	/* 清除 */
-	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	virtual void ClearAll();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
+	void ClearAll();
 
 	/* 添加测量点 */
-	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	virtual void AddMeasuringPoint();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
+	void AddMeasuringPoint();
+
+	/* 获取某一点测量线段的世界位置 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measurement Tools")
+	virtual FVector GetMeasuringLocationAtIndex(float Index);
+
+	/* 获取最后一测量线段的世界位置 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measurement Tools")
+	virtual FVector GetLastMeasuringLocation();
 };

@@ -26,19 +26,18 @@ void ACosmosDistanceMeasureTool::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACosmosDistanceMeasureTool::ClearAll()
+void ACosmosDistanceMeasureTool::ClearAll_Implementation()
 {
-	Super::ClearAll();
+	Super::ClearAll_Implementation();
 	MeasuredDistance.Empty();
 }
 
-void ACosmosDistanceMeasureTool::AddMeasuringPoint()
+void ACosmosDistanceMeasureTool::AddMeasuringPoint_Implementation()
 {
-	Super::AddMeasuringPoint();
-	if (MeasuringPoints.IsValidIndex(1))
+	Super::AddMeasuringPoint_Implementation();
+	if (MeasuringLocation.IsValidIndex(1))
 	{
-		const FVector LastTwoPoint = MeasuringPoints.Last()->K2_GetComponentLocation()
-			- MeasuringPoints.Last(1)->K2_GetComponentLocation();
+		const FVector LastTwoPoint = MeasuringLocation.Last() - MeasuringLocation.Last(1);
 		MeasuredDistance.Add(LastTwoPoint.Size() / 100.0f);
 		UE_LOG(LogTemp, Log, TEXT("MeasuredDistance %f"), MeasuredDistance.Last());
 	}
