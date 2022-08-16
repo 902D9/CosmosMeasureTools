@@ -28,6 +28,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void ClearAll_Implementation() override;
-	virtual void AddMeasuringPoint_Implementation() override;
+	virtual void GetMeasureResult() override;
 
 };

@@ -102,16 +102,24 @@ void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);
 
+	bIsFirstPointAfterStartMeasuring = true; // 标记这是开始测量后的第一次点击
+
 	// 更新已存在Cable缩放距离
 	for (auto& MeasuringCable : MeasuringCables)
 	{
-		MeasuringCable->SetMaxScaleDistance(TraceDistance);
+		if (MeasuringCable)
+		{
+			MeasuringCable->SetMaxScaleDistance(TraceDistance);
+		}
 	}
 
 	PreviewSphere->SetMaxScaleDistance(TraceDistance);
 	for (auto& MeasuringPoint : MeasuringPoints)
 	{
-		MeasuringPoint->SetMaxScaleDistance(TraceDistance);
+		if (MeasuringPoint)
+		{
+			MeasuringPoint->SetMaxScaleDistance(TraceDistance);
+		}
 	}
 }
 
@@ -126,6 +134,11 @@ void ACosmosMeasureTool::StopMeasuring()
 	}
 }
 
+void ACosmosMeasureTool::GetMeasureResult()
+{
+	// do in subject 
+}
+
 FVector ACosmosMeasureTool::GetMeasuringLocationAtIndex(float Index)
 {
 	if (MeasuringLocation.IsValidIndex(1) && Index != MeasuringLocation.Num() - 1)
@@ -133,10 +146,10 @@ FVector ACosmosMeasureTool::GetMeasuringLocationAtIndex(float Index)
 		const FVector PointOne = MeasuringLocation[Index];
 		const FVector PointTwo = MeasuringLocation[Index + 1];
 		return FVector(
-			(PointOne.X + PointTwo.X)/2,
-			(PointOne.Y + PointTwo.Y)/2,
-			(PointOne.Z + PointTwo.Z)/2
-			);
+			(PointOne.X + PointTwo.X) / 2,
+			(PointOne.Y + PointTwo.Y) / 2,
+			(PointOne.Z + PointTwo.Z) / 2
+		);
 	}
 	return FVector::ZeroVector;
 }
@@ -149,11 +162,26 @@ FVector ACosmosMeasureTool::GetLastMeasuringLocation()
 void ACosmosMeasureTool::ClearAll_Implementation()
 {
 	StopMeasuring();
+	// 清空存储的位置
+	MeasuringLocation.Empty();
+	// 销毁所有点
 	for (const auto& Point : MeasuringPoints)
 	{
-		Point->DestroyComponent();
+		if (Point)
+		{
+			Point->DestroyComponent();
+		}
 	}
 	MeasuringPoints.Empty();
+	// 销毁所有线
+	for (const auto& Cable : MeasuringCables)
+	{
+		if (Cable)
+		{
+			Cable->DestroyComponent();
+		}
+	}
+	MeasuringCables.Empty();
 }
 
 void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
@@ -177,5 +205,22 @@ void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 		MeasuringPoints.Add(Point); // 数组保存
 		MeasuringLocation.Add(Point->K2_GetComponentLocation());
 		CreateCable();
+
+		GetMeasureResult();
+		
+		// 不是开始测量后的第一个点 , 添加UI
+		if (!bIsFirstPointAfterStartMeasuring)
+		{
+			AddDisplayUI();
+		}
+		else
+		{
+			bIsFirstPointAfterStartMeasuring = false;
+		}
 	}
+}
+
+void ACosmosMeasureTool::AddDisplayUI_Implementation()
+{
+	// do in blueprint
 }

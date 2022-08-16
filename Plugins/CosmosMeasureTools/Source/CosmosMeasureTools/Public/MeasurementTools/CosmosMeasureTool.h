@@ -58,6 +58,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	TArray<FVector> MeasuringLocation;
 
+	// 标记是否是开始测量后添加的第一个点
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	bool bIsFirstPointAfterStartMeasuring;
+
 	/* 添加测量点间连线 */
 	UFUNCTION(Category = "Cosmos Measurement Tools")
 	void CreateCable();
@@ -88,6 +92,14 @@ public:
 	/* 添加测量点 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
 	void AddMeasuringPoint();
+	
+	/* 获得测量结果 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
+	virtual void GetMeasureResult();
+	
+	/* 添加测量结果 UI */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
+	void AddDisplayUI();
 
 	/* 获取某一点测量线段的世界位置 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measurement Tools")

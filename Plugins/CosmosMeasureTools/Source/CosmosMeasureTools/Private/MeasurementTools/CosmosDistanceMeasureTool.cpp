@@ -32,13 +32,14 @@ void ACosmosDistanceMeasureTool::ClearAll_Implementation()
 	MeasuredDistance.Empty();
 }
 
-void ACosmosDistanceMeasureTool::AddMeasuringPoint_Implementation()
+void ACosmosDistanceMeasureTool::GetMeasureResult()
 {
-	Super::AddMeasuringPoint_Implementation();
-	if (MeasuringLocation.IsValidIndex(1))
+	Super::GetMeasureResult();
+	// 测量中 && 不是开始测量后的第一个点 && 存在至少两个点
+	if (bMeasuring && !bIsFirstPointAfterStartMeasuring && MeasuringLocation.IsValidIndex(1))
 	{
 		const FVector LastTwoPoint = MeasuringLocation.Last() - MeasuringLocation.Last(1);
 		MeasuredDistance.Add(LastTwoPoint.Size() / 100.0f);
-		UE_LOG(LogTemp, Log, TEXT("MeasuredDistance %f"), MeasuredDistance.Last());
+		UE_LOG(LogTemp, Log, TEXT("MeasuredDistance %f"), LastTwoPoint.Size() / 100.0f);
 	}
 }
