@@ -21,6 +21,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	APlayerController* PlayerController;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USceneComponent* Root;
@@ -40,9 +43,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	UMaterialInterface* Material;
 
+	bool GetHitResultUnderMouse(FHitResult& HitResult);
+	
 	// 预览鼠标位置的点
 	UFUNCTION(Category = "Cosmos Measurement Tools")
-	void PreviewLastPoint();
+	virtual void PreviewLastPointAndCable();
 	// 预览鼠标位置的点的位置(世界)
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	FVector PreviewPointLocation;
@@ -64,7 +69,7 @@ protected:
 
 	/* 添加测量点间连线 */
 	UFUNCTION(Category = "Cosmos Measurement Tools")
-	void CreateCable();
+	virtual void CreateCable();
 	// 预览测量点间连线
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	UCosmosMeasureToolCableComponent* PreviewCable;

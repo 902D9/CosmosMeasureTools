@@ -20,6 +20,7 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 	PreviewSphere->SetupAttachment(RootComponent);
 	PreviewSphere->SetVisibility(false);
 	PreviewSphere->SetRelativeScale3D(FVector(0.1f));
+	PreviewSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	if (Material)
 	{
 		PreviewSphere->SetMaterial(0, Material);
@@ -30,11 +31,11 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 void ACosmosMeasureTool::BeginPlay()
 {
 	Super::BeginPlay();
+	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 }
 
-void ACosmosMeasureTool::PreviewLastPoint()
+bool ACosmosMeasureTool::GetHitResultUnderMouse(FHitResult& HitResult)
 {
-	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	if (PlayerController)
 	{
 		FVector WorldLocation;
@@ -42,25 +43,33 @@ void ACosmosMeasureTool::PreviewLastPoint()
 		// 射线检测 更新 预览位置
 		if (PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
 		{
-			FHitResult HitResult;
 			static const FName LineTraceSingleName(TEXT("LineTraceSingle"));
 			// FCollisionQueryParams Params = ConfigureCollisionParams(LineTraceSingleName, bTraceComplex, ActorsToIgnore, bIgnoreSelf, WorldContextObject);
 			FCollisionQueryParams Params;
-			Params.AddIgnoredActor(this); // 忽略自身
+			// Params.AddIgnoredActor(this); // 忽略自身
 			Params.bTraceComplex = bTraceComplex;
-			if (GetWorld()->LineTraceSingleByChannel(HitResult,
-			                                         WorldLocation, WorldLocation + (WorldDirection * TraceDistance),
-			                                         ECC_Visibility,
-			                                         Params))
-			{
-				PreviewPointLocation = HitResult.Location;
-				PreviewPointRelativeLocation = GetActorTransform().InverseTransformPosition(PreviewPointLocation),
-					PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
-				if (PreviewCable)
-				{
-					PreviewCable->EndLocation = PreviewPointRelativeLocation;
-				}
-			}
+			return (GetWorld()->LineTraceSingleByChannel(HitResult,
+			                                             WorldLocation,
+			                                             WorldLocation + (WorldDirection * TraceDistance),
+			                                             ECC_Visibility,
+			                                             Params));
+		}
+		return false;
+	}
+	return false;
+}
+
+void ACosmosMeasureTool::PreviewLastPointAndCable()
+{
+	FHitResult HitResult;
+	if (GetHitResultUnderMouse(HitResult))
+	{
+		PreviewPointLocation = HitResult.Location;
+		PreviewPointRelativeLocation = GetActorTransform().InverseTransformPosition(PreviewPointLocation),
+			PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
+		if (PreviewCable)
+		{
+			PreviewCable->EndLocation = PreviewPointRelativeLocation;
 		}
 	}
 }
@@ -70,7 +79,7 @@ void ACosmosMeasureTool::CreateCable()
 	// 如果存在连线，则先保存
 	if (PreviewCable)
 	{
-		MeasuringCables.Add(PreviewCable);
+		MeasuringCables.Emplace(PreviewCable);
 	}
 	PreviewCable = NewObject<UCosmosMeasureToolCableComponent>(this);
 	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform); // 设置起始位置
@@ -89,7 +98,7 @@ void ACosmosMeasureTool::Tick(float DeltaTime)
 
 	if (bMeasuring)
 	{
-		PreviewLastPoint();
+		PreviewLastPointAndCable();
 	}
 }
 
@@ -202,12 +211,12 @@ void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 		{
 			Point->SetMaterial(0, Material);
 		}
-		MeasuringPoints.Add(Point); // 数组保存
-		MeasuringLocation.Add(Point->K2_GetComponentLocation());
+		MeasuringPoints.Emplace(Point); // 数组保存
+		MeasuringLocation.Emplace(Point->K2_GetComponentLocation());
 		CreateCable();
 
 		GetMeasureResult();
-		
+
 		// 不是开始测量后的第一个点 , 添加UI
 		if (!bIsFirstPointAfterStartMeasuring)
 		{
