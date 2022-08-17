@@ -44,6 +44,6 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 * 获取多边形中心点
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	bool GetCenterOfVector(const TArray<FVector>& Points, FVector& Center);
+	static bool GetCenterOfVector(const TArray<FVector>& Points, FVector& Center);
 	
 };

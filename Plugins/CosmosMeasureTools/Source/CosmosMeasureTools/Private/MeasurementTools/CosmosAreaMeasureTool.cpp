@@ -297,6 +297,8 @@ void ACosmosAreaMeasureTool::AddMeasuringPoint_Implementation()
 			PickAndPlacePointByMouse();
 		}
 		GetMeasureResult();
+		
+		AddDisplayUI(); // UI
 	}
 }
 
@@ -316,8 +318,6 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 		{
 			MeasuredArea = UCosmosMeasureToolsBPLibrary::MeasurePolyArea(MeasuringLocation) / 10000.0f;
 			UE_LOG(LogTemp, Log, TEXT("MeasuredArea %f"), MeasuredArea);
-
-			AddDisplayUI(); // UI
 		}
 	}
 }
