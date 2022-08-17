@@ -13,7 +13,7 @@ UCosmosMeasureToolCableComponent::UCosmosMeasureToolCableComponent()
 	bEnableScaleByDistance = true;
 	MinScaleDistance = 1000.0f;
 	MaxScaleDistance = 3000.0f;
-	BaseCableScale = 80.0f;
+	BaseCableScale = 40.0f;
 
 	EndLocation = FVector::ZeroVector;
 	CableLength = 1.0f;

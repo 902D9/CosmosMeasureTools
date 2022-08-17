@@ -82,7 +82,7 @@ void ACosmosMeasureTool::CreateCable()
 		MeasuringCables.Emplace(PreviewCable);
 	}
 	PreviewCable = NewObject<UCosmosMeasureToolCableComponent>(this);
-	PreviewCable->SetRelativeTransform(PreviewPointRelativeTransform); // 设置起始位置
+	PreviewCable->SetWorldLocation(PreviewPointLocation); // 设置起始位置
 	PreviewCable->SetMaxScaleDistance(TraceDistance); // 设置缩放生效范围
 	if (Material)
 	{

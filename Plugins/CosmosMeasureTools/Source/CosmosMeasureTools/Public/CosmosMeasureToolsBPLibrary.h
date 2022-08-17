@@ -26,7 +26,10 @@ UCLASS()
 class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Execute Sample function", Keywords = "CosmosMeasureTools sample test testing"), Category = "CosmosMeasureToolsTesting")
-	static float CosmosMeasureToolsSampleFunction(float Param);
+	/**
+	 * 判断两线段是否相交 - 2D;
+	 * 传入两线段的点为 A B
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
+	static bool CheckWhetherTwoLineSegmentsIntersect2D(TArray<FVector2D> A,TArray<FVector2D> B);
 };

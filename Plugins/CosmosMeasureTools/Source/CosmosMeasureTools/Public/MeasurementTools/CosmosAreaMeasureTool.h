@@ -13,8 +13,8 @@ UCLASS()
 class COSMOSMEASURETOOLS_API ACosmosAreaMeasureTool : public ACosmosDistanceMeasureTool
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ACosmosAreaMeasureTool();
 
@@ -33,12 +33,29 @@ protected:
 	void PickAndPlacePointByMouse();
 	UPROPERTY()
 	UCosmosMeasureToolSphereComponent* PickedSphere;
+	/**
+	* 插入到数组，返回Index
+	* 1.找到数组内最近点A
+	* 2.找到与最近点A相邻的最近点B
+	*/
+	void SaveNewPoint(UCosmosMeasureToolSphereComponent* NewPoint, FVector NewLocation,
+	                  int32& PreIndex, int32& NextIndex);
+	/**
+	 * NewLocation 最近的现有点相邻两点中离 NewLocation 最近一点的下标
+	 */
+	int32 GetClosestConnectPointIndex(FVector NewLocation, int32 ClosestIndex);
+	/**
+	* 判断两点组成的线段是否和 已存在的线段 相交（2D）, 忽略与自身（PointIndex）相连的线段
+	* @param NewPointLocation 新增点的位置
+	* @param PointIndex 已有点的位置
+	*/
+	bool IsIntersectAnExistingLine(FVector NewPointLocation, int32 PointIndex);
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void ClearAll_Implementation() override;
+	virtual void StopMeasuring() override;
 	virtual void AddMeasuringPoint_Implementation() override;
 	virtual void GetMeasureResult() override;
 };
