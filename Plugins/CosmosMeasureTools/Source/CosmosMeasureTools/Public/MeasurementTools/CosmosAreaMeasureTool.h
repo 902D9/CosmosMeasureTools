@@ -25,6 +25,9 @@ protected:
 	// 由第一个点确定得到测量平面 - Z值
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	float MeasurePlaneZ;
+	// 测量得到的面积
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	float MeasuredArea;
 
 	virtual void PreviewLastPointAndCable() override;
 	virtual void CreateCable() override;

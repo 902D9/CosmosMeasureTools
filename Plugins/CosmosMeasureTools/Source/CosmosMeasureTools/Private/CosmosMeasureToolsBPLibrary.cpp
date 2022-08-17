@@ -2,6 +2,7 @@
 
 #include "CosmosMeasureToolsBPLibrary.h"
 #include "CosmosMeasureTools.h"
+#include "Engine/Polys.h"
 
 UCosmosMeasureToolsBPLibrary::UCosmosMeasureToolsBPLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -41,4 +42,15 @@ bool UCosmosMeasureToolsBPLibrary::CheckWhetherTwoLineSegmentsIntersect2D(TArray
 	}
 
 	return true;
+}
+
+float UCosmosMeasureToolsBPLibrary::MeasurePolyArea(const TArray<FVector>& Locations)
+{
+	FPoly NewPoly;
+	NewPoly.Init();
+	for (int i = 0; i < Locations.Num(); i++)
+	{
+		NewPoly.Vertices.Add(Locations[i]);
+	}
+	return NewPoly.Area();
 }

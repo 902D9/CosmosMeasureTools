@@ -103,7 +103,7 @@ void ACosmosAreaMeasureTool::PickAndPlacePointByMouse()
 				int32 PreIndex;
 				int32 NextIndex;
 				SaveNewPoint(Point, NewLocation, PreIndex, NextIndex);
-				UE_LOG(LogTemp, Log, TEXT("PreIndex %d ; NextIndex %d"), PreIndex, NextIndex);
+				// UE_LOG(LogTemp, Log, TEXT("PreIndex %d ; NextIndex %d"), PreIndex, NextIndex);
 				if (PreIndex != -1 && NextIndex != -1)
 				{
 					// 更新相连线位置
@@ -149,8 +149,8 @@ void ACosmosAreaMeasureTool::SaveNewPoint(UCosmosMeasureToolSphereComponent* New
 	}
 
 	const int32 ClosestConnectPointIndex = GetClosestConnectPointIndex(NewLocation, ClosestIndex);
-	UE_LOG(LogTemp, Log, TEXT("ClosestIndex %d ; ClosestConnectPointIndex %d"),
-	       ClosestIndex, ClosestConnectPointIndex);
+	// UE_LOG(LogTemp, Log, TEXT("ClosestIndex %d ; ClosestConnectPointIndex %d"),
+	//        ClosestIndex, ClosestConnectPointIndex);
 
 	if (ClosestConnectPointIndex != -1)
 	{
@@ -186,13 +186,13 @@ int32 ACosmosAreaMeasureTool::GetClosestConnectPointIndex(FVector NewLocation, i
 	// 获得距 最近的现有点 相邻两点距离，考虑到Loop
 	const int32 ClosestNextIndex = ClosestIndex + 1 <= MeasuringLocation.Num() - 1 ? ClosestIndex + 1 : 0;
 	const int32 ClosestPreIndex = ClosestIndex - 1 >= 0 ? ClosestIndex - 1 : MeasuringCables.Num() - 1;
-	
+
 	// 新增点与最近的现有点的下一点连线 是否与 现存线段存在相交
 	const bool bNextIndexCross = IsIntersectAnExistingLine(NewLocation, ClosestNextIndex);
 	// 新增点与最近的现有点的上一点连线 是否与 现存线段存在相交
 	const bool bPreIndexCross = IsIntersectAnExistingLine(NewLocation, ClosestPreIndex);
-	UE_LOG(LogTemp, Log, TEXT("bNextIndexCrossPre %hs ; bPreIndexCrossNext %hs"),
-	       bNextIndexCross? "True" : "False", bPreIndexCross? "True" : "False");
+	// UE_LOG(LogTemp, Log, TEXT("bNextIndexCrossPre %hs ; bPreIndexCrossNext %hs"),
+	//        bNextIndexCross? "True" : "False", bPreIndexCross? "True" : "False");
 	if (!bNextIndexCross && !bPreIndexCross) // 都不相交
 	{
 		const float NextDistance = (NewLocation - MeasuringLocation[ClosestNextIndex]).Size2D();
@@ -316,16 +316,17 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 	Super::GetMeasureResult();
 	if (bMeasuring)
 	{
-		switch (MeasuringLocation.Num())
+		if (MeasuringLocation.Num() == 1)
 		{
-		case 1:
 			if (bIsFirstPointAfterStartMeasuring)
 			{
 				MeasurePlaneZ = MeasuringLocation[0].Z;
 			}
-		case 2:
-		case 3:
-		default: ;
+		}
+		if (MeasuringLocation.Num() > 2)
+		{
+			MeasuredArea = UCosmosMeasureToolsBPLibrary::MeasurePolyArea(MeasuringLocation) / 10000.0f;
+			UE_LOG(LogTemp, Log, TEXT("MeasuredArea %f"), MeasuredArea);
 		}
 	}
 }
