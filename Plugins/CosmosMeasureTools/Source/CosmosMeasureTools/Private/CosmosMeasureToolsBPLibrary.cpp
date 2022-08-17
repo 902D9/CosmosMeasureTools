@@ -44,13 +44,53 @@ bool UCosmosMeasureToolsBPLibrary::CheckWhetherTwoLineSegmentsIntersect2D(TArray
 	return true;
 }
 
-float UCosmosMeasureToolsBPLibrary::MeasurePolyArea(const TArray<FVector>& Locations)
+float UCosmosMeasureToolsBPLibrary::MeasurePolyArea(const TArray<FVector> Locations)
 {
-	FPoly NewPoly;
-	NewPoly.Init();
-	for (int i = 0; i < Locations.Num(); i++)
+	// 只能计算凸多边形
+	// FPoly NewPoly;
+	// NewPoly.Init();
+	// for (int i = 0; i < Locations.Num(); i++)
+	// {
+	// 	NewPoly.Vertices.Add(Locations[i]);
+	// }
+	// return NewPoly.Area();
+
+	if (Locations.Num() < 3)
 	{
-		NewPoly.Vertices.Add(Locations[i]);
+		return 0;
 	}
-	return NewPoly.Area();
+	double Area = 0.0f;
+	for (int i = 0; i < Locations.Num(); ++i)
+	{
+		Area += Locations[i].X * Locations[(i + 1) % Locations.Num()].Y -
+			Locations[i].Y * Locations[(i + 1) % Locations.Num()].X;
+	}
+	return FMath::Abs(Area) / 2;
+}
+
+bool UCosmosMeasureToolsBPLibrary::GetCenterOfVector(const TArray<FVector>& Points, FVector& Center)
+{
+	if (Points.Num() == 1)
+	{
+		Center = Points[0];
+		return true;
+	}
+	if (Points.Num() >= 2)
+	{
+		float MinX = Points[0].X, MaxX = Points[0].X;
+		float MinY = Points[0].Y, MaxY = Points[0].Y;
+		float MinZ = Points[0].Z, MaxZ = Points[0].Z;
+		for (const FVector& Point : Points)
+		{
+			MinX = Point.X < MinX ? Point.X : MinX;
+			MaxX = Point.X > MaxX ? Point.X : MaxX;
+			MinY = Point.Y < MinY ? Point.Y : MinY;
+			MaxY = Point.Y > MaxY ? Point.Y : MaxY;
+			MinZ = Point.Z < MinZ ? Point.Z : MinZ;
+			MaxZ = Point.Z > MaxZ ? Point.Z : MaxZ;
+		}
+		Center = 0.5 * FVector(MaxX + MinX, MaxY + MinY, MaxZ + MinZ);
+		return true;
+	}
+	return false;
 }

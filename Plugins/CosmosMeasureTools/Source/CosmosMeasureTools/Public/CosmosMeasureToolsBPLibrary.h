@@ -38,5 +38,12 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 * 计算多边形面积
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	static float MeasurePolyArea(const TArray<FVector>& Locations);
+	static float MeasurePolyArea(const TArray<FVector> Locations);
+	
+	/**
+	 * 获取多边形中心点
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
+	bool GetCenterOfVector(const TArray<FVector>& Points, FVector& Center);
+	
 };

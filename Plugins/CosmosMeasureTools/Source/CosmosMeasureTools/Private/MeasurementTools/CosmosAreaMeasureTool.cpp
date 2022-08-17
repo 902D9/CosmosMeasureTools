@@ -296,18 +296,7 @@ void ACosmosAreaMeasureTool::AddMeasuringPoint_Implementation()
 		{
 			PickAndPlacePointByMouse();
 		}
-
-
 		GetMeasureResult();
-		// 不是开始测量后的第一个点 , 添加UI
-		if (!bIsFirstPointAfterStartMeasuring)
-		{
-			AddDisplayUI();
-		}
-		else
-		{
-			bIsFirstPointAfterStartMeasuring = false;
-		}
 	}
 }
 
@@ -327,6 +316,8 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 		{
 			MeasuredArea = UCosmosMeasureToolsBPLibrary::MeasurePolyArea(MeasuringLocation) / 10000.0f;
 			UE_LOG(LogTemp, Log, TEXT("MeasuredArea %f"), MeasuredArea);
+
+			AddDisplayUI(); // UI
 		}
 	}
 }
