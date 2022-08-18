@@ -25,6 +25,8 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 	{
 		PreviewSphere->SetMaterial(0, Material);
 	}
+
+	TraceChannel = ECC_Visibility;
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +53,7 @@ bool ACosmosMeasureTool::GetHitResultUnderMouse(FHitResult& HitResult)
 			return (GetWorld()->LineTraceSingleByChannel(HitResult,
 			                                             WorldLocation,
 			                                             WorldLocation + (WorldDirection * TraceDistance),
-			                                             ECC_Visibility,
+			                                             TraceChannel,
 			                                             Params));
 		}
 		return false;
@@ -102,11 +104,13 @@ void ACosmosMeasureTool::Tick(float DeltaTime)
 	}
 }
 
-void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance)
+void ACosmosMeasureTool::StartMeasuring(bool bMeasureComplex, float Distance,
+                                        TEnumAsByte<ECollisionChannel> ChannelToTrace)
 {
 	bMeasuring = true;
 	bTraceComplex = bMeasureComplex;
 	TraceDistance = Distance;
+	TraceChannel = ChannelToTrace;
 	// UE_LOG(LogTemp, Log, TEXT("Trace Distance %f"), TraceDistance);
 	PreviewSphere->SetVisibility(bMeasuring);
 	SetActorTickEnabled(bMeasuring);

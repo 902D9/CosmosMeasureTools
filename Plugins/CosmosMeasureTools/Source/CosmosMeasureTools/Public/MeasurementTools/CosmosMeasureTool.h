@@ -6,6 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "CosmosMeasureTool.generated.h"
 
+UENUM(BlueprintType)
+enum class EMeasureType:uint8
+{
+	// 距离测量
+	Distance UMETA(DisplayName="Distance"),
+	// 面积测量
+	Area UMETA(DisplayName="Area"),
+};
+
 class UCosmosMeasureToolSphereComponent;
 class UCosmosMeasureToolCableComponent;
 
@@ -21,7 +30,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	APlayerController* PlayerController;
 
@@ -39,12 +48,15 @@ protected:
 	// 测量时射线检测距离
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	float TraceDistance;
+	// 测量时射线检测通道
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	TEnumAsByte<ECollisionChannel> TraceChannel;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	UMaterialInterface* Material;
 
 	bool GetHitResultUnderMouse(FHitResult& HitResult);
-	
+
 	// 预览鼠标位置的点
 	UFUNCTION(Category = "Cosmos Measurement Tools")
 	virtual void PreviewLastPointAndCable();
@@ -83,9 +95,11 @@ public:
 	/** 开始测量
 	 * @param bMeasureComplex 测量是否使用复杂射线检测
 	 * @param Distance 测量时射线检测距离
+	 * @param ChannelToTrace 测量时射线检测通道
 	 **/
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
-	virtual void StartMeasuring(bool bMeasureComplex, float Distance = 2000.0f);
+	virtual void StartMeasuring(bool bMeasureComplex, float Distance = 2000.0f,
+	                            TEnumAsByte<ECollisionChannel> ChannelToTrace = ECC_Visibility);
 	/* 结束测量 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
 	virtual void StopMeasuring();
@@ -97,11 +111,11 @@ public:
 	/* 添加测量点 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
 	void AddMeasuringPoint();
-	
+
 	/* 获得测量结果 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measurement Tools")
 	virtual void GetMeasureResult();
-	
+
 	/* 添加测量结果 UI */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosmos Measurement Tools")
 	void AddDisplayUI();
