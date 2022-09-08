@@ -18,7 +18,7 @@ enum class EMeasureType:uint8
 class UCosmosMeasureToolSphereComponent;
 class UCosmosMeasureToolCableComponent;
 
-UCLASS(Blueprintable, ClassGroup="Cosmos Measurement Tools")
+UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
 class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public AActor
 {
 	GENERATED_BODY()

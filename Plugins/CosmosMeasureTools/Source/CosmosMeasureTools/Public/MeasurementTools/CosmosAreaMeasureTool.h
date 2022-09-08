@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
 class COSMOSMEASURETOOLS_API ACosmosAreaMeasureTool : public ACosmosDistanceMeasureTool
 {
 	GENERATED_BODY()

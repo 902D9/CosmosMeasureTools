@@ -6,7 +6,7 @@
 #include "CosmosMeasureTool.h"
 #include "CosmosDistanceMeasureTool.generated.h"
 
-UCLASS()
+UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
 class COSMOSMEASURETOOLS_API ACosmosDistanceMeasureTool : public ACosmosMeasureTool
 {
 	GENERATED_BODY()
