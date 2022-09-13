@@ -19,7 +19,7 @@ class UCosmosMeasureToolSphereComponent;
 class UCosmosMeasureToolCableComponent;
 
 UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
-class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public AActor
+class COSMOSMEASURETOOLS_API ACosmosMeasureTool  : public AActor
 {
 	GENERATED_BODY()
 
@@ -30,6 +30,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	APlayerController* PlayerController;

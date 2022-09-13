@@ -36,6 +36,28 @@ void ACosmosMeasureTool::BeginPlay()
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 }
 
+void ACosmosMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
+{
+	Super::ApplyWorldOffset(InOffset, bWorldShift);
+
+	// UE_LOG(LogTemp, Log, TEXT("ApplyWorldOffset %f  %f  %f %hhd"), InOffset.X, InOffset.Y, InOffset.Z, bWorldShift);
+	// if (!bWorldShift && !InOffset.IsZero())
+	// {
+	for (int i = 0; i < MeasuringCables.Num(); ++i)
+	{
+		UCosmosMeasureToolCableComponent* Cable = MeasuringCables[i];
+		// const FVector NewStartLocation = GetMeasuringLocationAtIndex(i) + InOffset;
+		const FVector NewStartLocation = MeasuringPoints[i]->GetComponentLocation();
+		MeasuringLocation[i] = NewStartLocation;
+		// UE_LOG(LogTemp, Log, TEXT("NewStartLocation %f  %f  %f"), NewStartLocation.X, NewStartLocation.Y,
+		//        NewStartLocation.Z);
+		Cable->SetWorldLocation(NewStartLocation); // 设置起始位置
+		// FVector EndLocation = Cable->EndLocation;
+		// Cable->EndLocation = EndLocation + InOffset; // 设置结束位置
+	}
+	// }
+}
+
 bool ACosmosMeasureTool::GetHitResultUnderMouse(FHitResult& HitResult)
 {
 	if (PlayerController)
@@ -216,7 +238,7 @@ void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 			Point->SetMaterial(0, Material);
 		}
 		MeasuringPoints.Emplace(Point); // 数组保存
-		MeasuringLocation.Emplace(Point->K2_GetComponentLocation());
+		MeasuringLocation.Emplace(Point->GetComponentLocation());
 		CreateCable();
 
 		GetMeasureResult();

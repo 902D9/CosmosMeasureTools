@@ -31,6 +31,14 @@ void UCosmosMeasureToolCableComponent::BeginPlay()
 	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
+void UCosmosMeasureToolCableComponent::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
+{
+	Super::ApplyWorldOffset(InOffset, bWorldShift);
+
+	// SetWorldLocation(GetComponentLocation() + InOffset);
+	
+}
+
 void UCosmosMeasureToolCableComponent::ScaleCableByDistanceToCamera()
 {
 	if (bEnableScaleByDistance)

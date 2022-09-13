@@ -19,6 +19,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	APlayerController* PlayerController;
