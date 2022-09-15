@@ -55,6 +55,10 @@ void ACosmosMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldSh
 		// FVector EndLocation = Cable->EndLocation;
 		// Cable->EndLocation = EndLocation + InOffset; // 设置结束位置
 	}
+	if (PreviewCable)
+	{
+		PreviewCable->SetWorldLocation(PreviewCable->GetComponentLocation() + InOffset);
+	}
 	// }
 }
 
