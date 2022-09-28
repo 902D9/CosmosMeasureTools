@@ -21,6 +21,22 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
+	
+	// 点击判断是否拾取到点 时的击中结果，需要应用世界坐标偏移
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FHitResult PickAndPlacePointByMouseHitResult;
+	// 判断是否拾取到点时 点击到某一点的世界坐标位置，需要应用世界坐标偏移
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector PickedLocation;
+	// 插入到数组点坐标，需要应用世界坐标偏移
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector NewSaveNewPointLocation;
+	// 插入到数组点坐标，需要应用世界坐标偏移
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector IsIntersectAnExistingLineNewPointLocation;
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	FVector NewPointLocation;
 
 	// 由第一个点确定得到测量平面 - Z值
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
@@ -49,16 +65,20 @@ protected:
 	int32 GetClosestConnectPointIndex(FVector NewLocation, int32 ClosestIndex);
 	/**
 	* 判断两点组成的线段是否和 已存在的线段 相交（2D）, 忽略与自身（PointIndex）相连的线段
-	* @param NewPointLocation 新增点的位置
+	* @param InNewPointLocation 新增点的位置
 	* @param PointIndex 已有点的位置
 	*/
-	bool IsIntersectAnExistingLine(FVector NewPointLocation, int32 PointIndex);
+	bool IsIntersectAnExistingLine(FVector InNewPointLocation, int32 PointIndex);
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void StartMeasuring(bool bMeasureComplex, float Distance, TEnumAsByte<ECollisionChannel> ChannelToTrace) override;
 	virtual void StopMeasuring() override;
 	virtual void AddMeasuringPoint_Implementation() override;
 	virtual void GetMeasureResult() override;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measurement Tools")
+	float GetMeasuredArea();
 };

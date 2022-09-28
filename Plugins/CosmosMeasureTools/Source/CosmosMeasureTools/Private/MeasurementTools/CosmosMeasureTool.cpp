@@ -43,15 +43,22 @@ void ACosmosMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldSh
 	// UE_LOG(LogTemp, Log, TEXT("ApplyWorldOffset %f  %f  %f %hhd"), InOffset.X, InOffset.Y, InOffset.Z, bWorldShift);
 	// if (!bWorldShift && !InOffset.IsZero())
 	// {
-	for (int i = 0; i < MeasuringCables.Num(); ++i)
+	for (int i = 0; i < MeasuringLocation.Num(); ++i)
 	{
-		UCosmosMeasureToolCableComponent* Cable = MeasuringCables[i];
 		// const FVector NewStartLocation = GetMeasuringLocationAtIndex(i) + InOffset;
 		const FVector NewStartLocation = MeasuringPoints[i]->GetComponentLocation();
+		// const FVector NewStartLocation = MeasuringLocation[i] + InOffset;
 		MeasuringLocation[i] = NewStartLocation;
 		// UE_LOG(LogTemp, Log, TEXT("NewStartLocation %f  %f  %f"), NewStartLocation.X, NewStartLocation.Y,
 		//        NewStartLocation.Z);
-		Cable->SetWorldLocation(NewStartLocation); // 设置起始位置
+		if (MeasuringCables.IsValidIndex(i))
+		{
+			UCosmosMeasureToolCableComponent* Cable = MeasuringCables[i];
+			if (Cable)
+			{
+				Cable->SetWorldLocation(NewStartLocation); // 设置起始位置
+			}
+		}
 		// FVector EndLocation = Cable->EndLocation;
 		// Cable->EndLocation = EndLocation + InOffset; // 设置结束位置
 	}
