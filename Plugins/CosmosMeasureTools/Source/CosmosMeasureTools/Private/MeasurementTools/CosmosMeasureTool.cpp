@@ -250,16 +250,24 @@ void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 		}
 		MeasuringPoints.Emplace(Point); // 数组保存
 		MeasuringLocation.Emplace(Point->GetComponentLocation());
-		CreateCable();
+
+		switch (MeasureResultDisplayType)
+		{
+		case EMeasureResultDisplayType::World:
+			CreateCable(); // 世界创建连线
+			break;
+		case EMeasureResultDisplayType::Screen:
+			// UI 创建连线
+			break;
+		default: ;
+		}
 
 		GetMeasureResult();
 
-		// 不是开始测量后的第一个点 , 添加UI
-		if (!bIsFirstPointAfterStartMeasuring)
-		{
-			AddDisplayUI();
-		}
-		else
+		AddDisplayUI();
+
+		// 标记是否是第一个点,最后执行
+		if (bIsFirstPointAfterStartMeasuring)
 		{
 			bIsFirstPointAfterStartMeasuring = false;
 		}

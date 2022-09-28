@@ -100,8 +100,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	TArray<UCosmosMeasureToolCableComponent*> MeasuringCables;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools", meta=(ExposeOnSpawn))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Cosmos Measurement Tools", meta=(ExposeOnSpawn))
 	EMeasureResultDisplayType MeasureResultDisplayType = EMeasureResultDisplayType::Screen;
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	EMeasureType MeasureType;
 
 public:
 	// Called every frame
