@@ -36,6 +36,39 @@ void ACosmosMeasureTool::BeginPlay()
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 }
 
+void ACosmosMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
+{
+	Super::ApplyWorldOffset(InOffset, bWorldShift);
+
+	// UE_LOG(LogTemp, Log, TEXT("ApplyWorldOffset %f  %f  %f %hhd"), InOffset.X, InOffset.Y, InOffset.Z, bWorldShift);
+	// if (!bWorldShift && !InOffset.IsZero())
+	// {
+	for (int i = 0; i < MeasuringLocation.Num(); ++i)
+	{
+		// const FVector NewStartLocation = GetMeasuringLocationAtIndex(i) + InOffset;
+		const FVector NewStartLocation = MeasuringPoints[i]->GetComponentLocation();
+		// const FVector NewStartLocation = MeasuringLocation[i] + InOffset;
+		MeasuringLocation[i] = NewStartLocation;
+		// UE_LOG(LogTemp, Log, TEXT("NewStartLocation %f  %f  %f"), NewStartLocation.X, NewStartLocation.Y,
+		//        NewStartLocation.Z);
+		if (MeasuringCables.IsValidIndex(i))
+		{
+			UCosmosMeasureToolCableComponent* Cable = MeasuringCables[i];
+			if (Cable)
+			{
+				Cable->SetWorldLocation(NewStartLocation); // 设置起始位置
+			}
+		}
+		// FVector EndLocation = Cable->EndLocation;
+		// Cable->EndLocation = EndLocation + InOffset; // 设置结束位置
+	}
+	if (PreviewCable)
+	{
+		PreviewCable->SetWorldLocation(PreviewCable->GetComponentLocation() + InOffset);
+	}
+	// }
+}
+
 bool ACosmosMeasureTool::GetHitResultUnderMouse(FHitResult& HitResult)
 {
 	if (PlayerController)
@@ -216,17 +249,25 @@ void ACosmosMeasureTool::AddMeasuringPoint_Implementation()
 			Point->SetMaterial(0, Material);
 		}
 		MeasuringPoints.Emplace(Point); // 数组保存
-		MeasuringLocation.Emplace(Point->K2_GetComponentLocation());
-		CreateCable();
+		MeasuringLocation.Emplace(Point->GetComponentLocation());
+
+		switch (MeasureResultDisplayType)
+		{
+		case EMeasureResultDisplayType::World:
+			CreateCable(); // 世界创建连线
+			break;
+		case EMeasureResultDisplayType::Screen:
+			// UI 创建连线
+			break;
+		default: ;
+		}
 
 		GetMeasureResult();
 
-		// 不是开始测量后的第一个点 , 添加UI
-		if (!bIsFirstPointAfterStartMeasuring)
-		{
-			AddDisplayUI();
-		}
-		else
+		AddDisplayUI();
+
+		// 标记是否是第一个点,最后执行
+		if (bIsFirstPointAfterStartMeasuring)
 		{
 			bIsFirstPointAfterStartMeasuring = false;
 		}

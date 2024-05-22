@@ -15,10 +15,20 @@ enum class EMeasureType:uint8
 	Area UMETA(DisplayName="Area"),
 };
 
+// 测量结果展现形式
+UENUM(BlueprintType)
+enum class EMeasureResultDisplayType:uint8
+{
+	// 世界内展现
+	World UMETA(DisplayName="World"),
+	// 使用 UI 展现
+	Screen UMETA(DisplayName="Screen"),
+};
+
 class UCosmosMeasureToolSphereComponent;
 class UCosmosMeasureToolCableComponent;
 
-UCLASS(Blueprintable, ClassGroup="Cosmos Measurement Tools")
+UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
 class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public AActor
 {
 	GENERATED_BODY()
@@ -30,6 +40,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	APlayerController* PlayerController;
@@ -87,6 +99,11 @@ protected:
 	UCosmosMeasureToolCableComponent* PreviewCable;
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	TArray<UCosmosMeasureToolCableComponent*> MeasuringCables;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Cosmos Measurement Tools", meta=(ExposeOnSpawn))
+	EMeasureResultDisplayType MeasureResultDisplayType = EMeasureResultDisplayType::Screen;
+	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
+	EMeasureType MeasureType;
 
 public:
 	// Called every frame
