@@ -94,3 +94,30 @@ bool UCosmosMeasureToolsBPLibrary::GetCenterOfVector(const TArray<FVector>& Poin
 	}
 	return false;
 }
+
+bool UCosmosMeasureToolsBPLibrary::IsPointInPolygon2D(const FVector2D& TestPoint,
+                                                      const TArray<FVector2D>& PolygonPoints)
+{
+	const int NumPoints = PolygonPoints.Num();
+	float AngleSum = 0.0f;
+	for (int PointIndex = 0; PointIndex < NumPoints; ++PointIndex)
+	{
+		const FVector2D& VecAB = PolygonPoints[PointIndex] - TestPoint;
+		const FVector2D& VecAC = PolygonPoints[(PointIndex + 1) % NumPoints] - TestPoint;
+		const float Angle = FMath::Sign(FVector2D::CrossProduct(VecAB, VecAC)) * FMath::Acos(
+			FMath::Clamp(FVector2D::DotProduct(VecAB, VecAC) / (VecAB.Size() * VecAC.Size()), -1.0f, 1.0f));
+		AngleSum += Angle;
+	}
+	return (FMath::Abs(AngleSum) > 0.001f);
+}
+
+bool UCosmosMeasureToolsBPLibrary::IsPointInPolygon(const FVector& TestPoint, const TArray<FVector>& PolygonPoints)
+{
+	const int NumPoints = PolygonPoints.Num();
+	TArray<FVector2D> PolygonPoints2D;
+	for (int PointIndex = 0; PointIndex < NumPoints; ++PointIndex)
+	{
+		PolygonPoints2D.Emplace(FVector2D(PolygonPoints[PointIndex]));
+	}
+	return IsPointInPolygon2D(FVector2D(TestPoint), PolygonPoints2D);
+}

@@ -26,24 +26,34 @@ UCLASS()
 class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
-	
 	/**
 	 * 判断两线段是否相交 - 2D;
 	 * 传入两线段的点为 A B
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	static bool CheckWhetherTwoLineSegmentsIntersect2D(TArray<FVector2D> A,TArray<FVector2D> B);
+	static bool CheckWhetherTwoLineSegmentsIntersect2D(TArray<FVector2D> A, TArray<FVector2D> B);
 
 	/**
 	 * 计算多边形面积
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
 	static float MeasurePolyArea(const TArray<FVector> Locations);
-	
+
 	/**
 	 * 获取多边形中心点
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
 	static bool GetCenterOfVector(const TArray<FVector>& Points, FVector& Center);
-	
+
+	/**
+	 * 是否点在多边形内部
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measure Tools")
+	static bool IsPointInPolygon2D(const FVector2D& TestPoint, const TArray<FVector2D>& PolygonPoints);
+
+	/**
+	 * 是否点在多边形内部
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measure Tools")
+	static bool IsPointInPolygon(const FVector& TestPoint, const TArray<FVector>& PolygonPoints);
 };
