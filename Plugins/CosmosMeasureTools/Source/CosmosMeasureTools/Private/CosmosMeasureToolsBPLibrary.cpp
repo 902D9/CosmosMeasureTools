@@ -136,37 +136,61 @@ FVector UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(const FVector Value,
 	return FVector(X, Y, Z);
 }
 
+/**
+ * 将多边形分割成三角形
+ * 
+ * @param InVertices 输入的多边形顶点数组
+ * @param Triangles 输出的三角形顶点索引数组
+ */
 void UCosmosMeasureToolsBPLibrary::PolygonSplitsTriangles(const TArray<FVector>& InVertices,
                                                           TArray<FIntVector>& Triangles)
 {
+	// 清空输出数组
 	Triangles.Empty();
 
+	// 获取输入顶点的数量
 	const int VerticesNum = InVertices.Num();
-	if (VerticesNum >= 3) //至少存在一个三角形
+	// 如果顶点数量大于等于3，即至少能构成一个三角形
+	if (VerticesNum >= 3)
 	{
+		// @todo:传入顶点未按照多边形的顺序，需要先对顶点进行排序。但是实际不应该有这一步，传入时必须排好序
 		// @todo: 5.1 FGeometryScriptVectorList
+		// 创建一个二维多边形对象
 		TPolygon2<float> Polygon;
+		// 遍历输入的三维顶点，将其转换为二维顶点并添加到多边形中
 		for (const auto Point : InVertices)
 		{
 			FVector2D TmpPoint = FVector2D(Point.X, Point.Y);
+			// 获取当前点与多边形最后一个点的距离，如果距离过近则忽略该点
 			FVector2D LastPointOfPolygon = Polygon.VertexCount() == 0
 				                               ? FVector2D(99999, 99999)
 				                               : FVector2D(Polygon[Polygon.VertexCount() - 1]);
-			if (FVector2D::Distance(LastPointOfPolygon, TmpPoint) > 1.0f) // 忽略与上一个点距离过近的点
+			if (FVector2D::Distance(LastPointOfPolygon, TmpPoint) > 1.0f)
 			{
 				Polygon.AppendVertex(TmpPoint);
 			}
 		}
+		// 初始化失败次数
 		int FailedTimes = 0;
+		// 当多边形的顶点数量大于3时，尝试将其分割成三角形
 		while (Polygon.VertexCount() > 3)
 		{
-			for (int i = 0; i < Polygon.VertexCount(); i++)
+			// 遍历多边形的每个顶点
+			// for (int i = 0; i < Polygon.VertexCount(); i++)
+			for (int i = Polygon.VertexCount() - 1; i >= 0; --i) // 逆序遍历多边形顶点，删除顶点时，循环索引不会受到影响。
 			{
+				// 获取当前顶点的前一个和后一个顶点的索引
 				const int Previous = (i + Polygon.VertexCount() - 1) % Polygon.VertexCount();
 				const int Next = (i + 1) % Polygon.VertexCount();
+				// 创建当前顶点与前后顶点构成的线段
 				TSegment2<float> Line(FVector2D(Polygon[Previous].X, Polygon[Previous].Y),
 				                      FVector2D(Polygon[Next].X, Polygon[Next].Y));
-				Line = TSegment2<float>(Line.Center, Line.Direction, Line.Extent * 0.95); //短一点
+
+				// **注释**: 为了确保线段完全位于多边形内部，减少因浮点数精度问题导致的误判，
+				// 将线段缩短5%，以提高算法的鲁棒性。
+				Line = TSegment2<float>(Line.Center, Line.Direction, Line.Extent * 0.95);
+
+				// 如果线段完全在多边形内部，或者尝试次数过多，则将三个顶点索引添加到输出数组，并移除当前顶点
 				if (Polygon.Contains(Line) || FailedTimes > VerticesNum * 5)
 				{
 					FIntVector T;
@@ -175,10 +199,11 @@ void UCosmosMeasureToolsBPLibrary::PolygonSplitsTriangles(const TArray<FVector>&
 					Polygon.RemoveVertex(i);
 					break;
 				}
+				// 增加失败次数
 				++FailedTimes;
 			}
 		}
-
+		// 对于剩余的三个顶点，直接构成一个三角形并添加到输出数组
 		const FIntVector T = FIntVector(0, 1, 2);
 		Triangles.Add(T);
 	}

@@ -226,7 +226,7 @@ void ACosmosAreaMeasureTool::SaveNewPoint(UCosmosMeasureToolSphereComponent* New
 	{
 		PreIndex = FMath::Min(ClosestIndex, ClosestConnectPointIndex);
 		NextIndex = FMath::Max(ClosestIndex, ClosestConnectPointIndex);
-		// UE_LOG(LogTemp, Log, TEXT("Between %d %d"), PreIndex, NextIndex);
+		UE_LOG(LogTemp, Log, TEXT("Between %d %d"), PreIndex, NextIndex);
 		// 特殊情况：一点为0 一点为last，即在Loop的位置
 		if (PreIndex == 0 && NextIndex == MeasuringLocation.Num() - 1)
 		{
@@ -432,6 +432,7 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 			for (int i = 0; i < Triangles.Num(); i++)
 			{
 				const FIntVector& Triangle = Triangles[i];
+				UE_LOG(LogTemp, Log, TEXT("Triangle %d %d %d"), Triangle.X, Triangle.Y, Triangle.Z)
 				FCanvasUVTri CanvasUVTriangle;
 				CanvasUVTriangle.V0_Pos = FVector2D(
 					UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(MeasuringLocation[Triangle.X],
@@ -445,9 +446,11 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 					UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(MeasuringLocation[Triangle.Z],
 					                                                    Origin - BoxExtent, Origin + BoxExtent,
 					                                                    FVector(0.0f), FVector(Size, 0)));
-				CanvasUVTriangle.V0_Color = FLinearColor::White;
-				CanvasUVTriangle.V1_Color = FLinearColor::White;
-				CanvasUVTriangle.V2_Color = FLinearColor::White;
+				const FLinearColor TriangleColor = FLinearColor::MakeRandomColor();
+				// const FLinearColor TriangleColor = FLinearColor::White;
+				CanvasUVTriangle.V0_Color = TriangleColor;
+				CanvasUVTriangle.V1_Color = TriangleColor;
+				CanvasUVTriangle.V2_Color = TriangleColor;
 				CanvasUVTriangles.Emplace(CanvasUVTriangle);
 			}
 			Canvas->K2_DrawTriangle(nullptr, CanvasUVTriangles);
