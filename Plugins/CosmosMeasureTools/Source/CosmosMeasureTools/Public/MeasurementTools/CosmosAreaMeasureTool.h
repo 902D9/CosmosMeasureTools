@@ -16,13 +16,13 @@ class COSMOSMEASURETOOLS_API ACosmosAreaMeasureTool : public ACosmosDistanceMeas
 
 public:
 	// Sets default values for this actor's properties
-	ACosmosAreaMeasureTool();
+	ACosmosAreaMeasureTool(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
-	
+
 	// 点击判断是否拾取到点 时的击中结果，需要应用世界坐标偏移
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	FHitResult PickAndPlacePointByMouseHitResult;
@@ -40,10 +40,10 @@ protected:
 
 	// 由第一个点确定得到测量平面 - Z值
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
-	float MeasurePlaneZ;
+	float MeasurePlaneZ = 0.0f;
 	// 测量得到的面积
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
-	float MeasuredArea;
+	float MeasuredArea = 0.0f;
 
 	virtual void PreviewLastPointAndCable() override;
 	virtual void CreateCable() override;
@@ -51,7 +51,7 @@ protected:
 	// 未拾取到点则尝试拾取，若已经拾取到点则更新位置
 	void PickAndPlacePointByMouse();
 	UPROPERTY()
-	UCosmosMeasureToolSphereComponent* PickedSphere;
+	UCosmosMeasureToolSphereComponent* PickedSphere = nullptr;
 	/**
 	* 插入到数组，返回Index
 	* 1.找到数组内最近点A
@@ -70,12 +70,20 @@ protected:
 	*/
 	bool IsIntersectAnExistingLine(FVector InNewPointLocation, int32 PointIndex);
 
+private:
+	// 绘制面积填充的画布
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
+		meta = (AllowPrivateAccess="true"))
+	UStaticMeshComponent* CanvasMesh;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartMeasuring(bool bMeasureComplex, float Distance, TEnumAsByte<ECollisionChannel> ChannelToTrace) override;
+	virtual void StartMeasuring(bool bMeasureComplex, float Distance,
+	                            TEnumAsByte<ECollisionChannel> ChannelToTrace) override;
 	virtual void StopMeasuring() override;
+	virtual  void ClearAll_Implementation() override;
 	virtual void AddMeasuringPoint_Implementation() override;
 	virtual void GetMeasureResult() override;
 

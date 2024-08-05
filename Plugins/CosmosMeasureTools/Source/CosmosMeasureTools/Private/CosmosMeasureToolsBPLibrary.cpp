@@ -68,11 +68,11 @@ float UCosmosMeasureToolsBPLibrary::MeasurePolyArea(const TArray<FVector> Locati
 	return FMath::Abs(Area) / 2;
 }
 
-bool UCosmosMeasureToolsBPLibrary::GetCenterOfVector(const TArray<FVector>& Points, FVector& Center)
+bool UCosmosMeasureToolsBPLibrary::GetBoundOfPolygon(const TArray<FVector>& Points, FVector& Origin, FVector& BoxExtent)
 {
 	if (Points.Num() == 1)
 	{
-		Center = Points[0];
+		Origin = Points[0];
 		return true;
 	}
 	if (Points.Num() >= 2)
@@ -89,7 +89,8 @@ bool UCosmosMeasureToolsBPLibrary::GetCenterOfVector(const TArray<FVector>& Poin
 			MinZ = Point.Z < MinZ ? Point.Z : MinZ;
 			MaxZ = Point.Z > MaxZ ? Point.Z : MaxZ;
 		}
-		Center = 0.5 * FVector(MaxX + MinX, MaxY + MinY, MaxZ + MinZ);
+		Origin = 0.5 * FVector(MaxX + MinX, MaxY + MinY, MaxZ + MinZ);
+		BoxExtent = 0.5 * FVector(MaxX - MinX, MaxY - MinY, MaxZ - MinZ);
 		return true;
 	}
 	return false;

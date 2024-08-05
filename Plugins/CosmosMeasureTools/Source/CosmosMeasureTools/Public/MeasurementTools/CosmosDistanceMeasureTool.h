@@ -13,7 +13,7 @@ class COSMOSMEASURETOOLS_API ACosmosDistanceMeasureTool : public ACosmosMeasureT
 	
 public:	
 	// Sets default values for this actor's properties
-	ACosmosDistanceMeasureTool();
+	ACosmosDistanceMeasureTool(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	// Called when the game starts or when spawned

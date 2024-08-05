@@ -7,12 +7,19 @@
 #include "MeasurementTools/CosmosMeasureToolCableComponent.h"
 #include "MeasurementTools/CosmosMeasureToolSphereComponent.h"
 
-ACosmosAreaMeasureTool::ACosmosAreaMeasureTool()
+ACosmosAreaMeasureTool::ACosmosAreaMeasureTool(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeasureType = EMeasureType::Area;
+	CanvasMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanvasMesh"));
+	CanvasMesh->SetupAttachment(RootComponent);
+	CanvasMesh->SetVisibility(false);
+	CanvasMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(nullptr,TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
+	CanvasMesh->SetStaticMesh(MeshAsset);
 }
 
 void ACosmosAreaMeasureTool::BeginPlay()
@@ -49,6 +56,7 @@ void ACosmosAreaMeasureTool::PreviewLastPointAndCable()
 	if (GetHitResultUnderMouse(HitResult))
 	{
 		// 限制在一个平面
+		// @todo: 直接修改Z值会让预览点的位置不除在鼠标处
 		PreviewPointLocation = FVector(HitResult.Location.X, HitResult.Location.Y,
 		                               MeasuringLocation.Num() == 0 ? HitResult.Location.Z : MeasurePlaneZ);
 		PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
@@ -325,6 +333,12 @@ void ACosmosAreaMeasureTool::StopMeasuring()
 	}
 }
 
+void ACosmosAreaMeasureTool::ClearAll_Implementation()
+{
+	Super::ClearAll_Implementation();
+	CanvasMesh->SetVisibility(false);
+}
+
 void ACosmosAreaMeasureTool::AddMeasuringPoint_Implementation()
 {
 	// Super::AddMeasuringPoint_Implementation();
@@ -338,6 +352,7 @@ void ACosmosAreaMeasureTool::AddMeasuringPoint_Implementation()
 				PreviewPointRelativeLocation,
 				FVector(0.1f)
 			);
+			// @todo: 尝试使用 Instanced
 			UCosmosMeasureToolSphereComponent* Point = NewObject<UCosmosMeasureToolSphereComponent>(this);
 			Point->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 			Point->SetRelativeTransform(PreviewPointRelativeTransform);
@@ -385,6 +400,13 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 		{
 			MeasuredArea = UCosmosMeasureToolsBPLibrary::MeasurePolyArea(MeasuringLocation) / 10000.0f;
 			UE_LOG(LogTemp, Log, TEXT("MeasuredArea %f"), MeasuredArea);
+			// 绘制面积填充
+			FVector Origin, BoxExtent;
+			UCosmosMeasureToolsBPLibrary::GetBoundOfPolygon(MeasuringLocation, Origin, BoxExtent);
+			CanvasMesh->SetWorldLocation(Origin);
+			BoxExtent *= 0.01f * 2.0f;
+			CanvasMesh->SetWorldScale3D(FVector(BoxExtent.X, BoxExtent.Y, 1.0f));
+			CanvasMesh->SetVisibility(true);
 		}
 	}
 }

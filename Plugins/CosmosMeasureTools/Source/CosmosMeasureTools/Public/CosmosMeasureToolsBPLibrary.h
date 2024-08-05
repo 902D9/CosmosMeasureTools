@@ -40,10 +40,10 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	static float MeasurePolyArea(const TArray<FVector> Locations);
 
 	/**
-	 * 获取多边形中心点
+	 * 获取多边形边界和中心点
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	static bool GetCenterOfVector(const TArray<FVector>& Points, FVector& Center);
+	static bool GetBoundOfPolygon(const TArray<FVector>& Points, FVector& Origin, FVector& BoxExtent);
 
 	/**
 	 * 是否点在多边形内部

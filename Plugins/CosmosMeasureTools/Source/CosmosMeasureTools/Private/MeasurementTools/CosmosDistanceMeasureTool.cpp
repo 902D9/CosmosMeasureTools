@@ -8,7 +8,8 @@
 // DECLARE_LOG_CATEGORY_EXTERN(CosmosMeasurementTools, Log, All);
 
 // Sets default values
-ACosmosDistanceMeasureTool::ACosmosDistanceMeasureTool()
+ACosmosDistanceMeasureTool::ACosmosDistanceMeasureTool(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
