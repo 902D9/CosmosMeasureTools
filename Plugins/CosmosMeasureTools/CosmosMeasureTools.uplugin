@@ -23,6 +23,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "GeometryProcessing",
+			"Enabled": true
+		},
+		{
 			"Name": "CableComponent",
 			"Enabled": true
 		}

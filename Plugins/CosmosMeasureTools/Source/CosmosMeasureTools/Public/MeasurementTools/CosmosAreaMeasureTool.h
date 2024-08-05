@@ -75,6 +75,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
 	UStaticMeshComponent* CanvasMesh;
+	// 绘制面积填充的材质
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
+		meta = (AllowPrivateAccess="true"))
+	 UMaterialInstanceDynamic* CanvasMaterial;
+	// 绘制面积填充的渲染对象
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
+		meta = (AllowPrivateAccess="true"))
+	UTextureRenderTarget2D* CanvasRenderTarget;
 
 public:
 	// Called every frame

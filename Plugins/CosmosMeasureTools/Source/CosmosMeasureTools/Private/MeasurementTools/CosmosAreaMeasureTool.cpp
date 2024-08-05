@@ -4,6 +4,9 @@
 #include "MeasurementTools/CosmosAreaMeasureTool.h"
 
 #include "CosmosMeasureToolsBPLibrary.h"
+#include "Engine/Canvas.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetRenderingLibrary.h"
 #include "MeasurementTools/CosmosMeasureToolCableComponent.h"
 #include "MeasurementTools/CosmosMeasureToolSphereComponent.h"
 
@@ -25,6 +28,16 @@ ACosmosAreaMeasureTool::ACosmosAreaMeasureTool(const FObjectInitializer& ObjectI
 void ACosmosAreaMeasureTool::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 创建动态材质示例
+	UMaterial* MaterialAsset = LoadObject<UMaterial>(
+		nullptr,TEXT("Material'/CosmosMeasureTools/Materials/Master/M_MeasureAreaMask.M_MeasureAreaMask'"));
+	CanvasMaterial = UMaterialInstanceDynamic::Create(MaterialAsset, this);
+	CanvasMesh->SetMaterial(0, CanvasMaterial);
+	CanvasRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1024, RTF_RGBA16f,
+	                                                                   FLinearColor(0, 0, 0, 0));
+	CanvasMaterial->SetTextureParameterValue("CanvasTexture", CanvasRenderTarget);
+	CanvasMaterial->SetVectorParameterValue("Color", FLinearColor::Red);
 }
 
 void ACosmosAreaMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
@@ -404,9 +417,40 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 			FVector Origin, BoxExtent;
 			UCosmosMeasureToolsBPLibrary::GetBoundOfPolygon(MeasuringLocation, Origin, BoxExtent);
 			CanvasMesh->SetWorldLocation(Origin);
-			BoxExtent *= 0.01f * 2.0f;
-			CanvasMesh->SetWorldScale3D(FVector(BoxExtent.X, BoxExtent.Y, 1.0f));
+			const FVector Scale = BoxExtent * 0.01f * 2.0f;
+			CanvasMesh->SetWorldScale3D(FVector(Scale.X, Scale.Y, 1.0f));
 			CanvasMesh->SetVisibility(true);
+			UKismetRenderingLibrary::ClearRenderTarget2D(this, CanvasRenderTarget, FLinearColor(0, 0, 0, 0));
+			UCanvas* Canvas;
+			FVector2D Size;
+			FDrawToRenderTargetContext Context;
+			UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(this, CanvasRenderTarget,
+			                                                       Canvas, Size, Context);
+			TArray<FIntVector> Triangles;
+			UCosmosMeasureToolsBPLibrary::PolygonSplitsTriangles(MeasuringLocation, Triangles);
+			TArray<FCanvasUVTri> CanvasUVTriangles;
+			for (int i = 0; i < Triangles.Num(); i++)
+			{
+				const FIntVector& Triangle = Triangles[i];
+				FCanvasUVTri CanvasUVTriangle;
+				CanvasUVTriangle.V0_Pos = FVector2D(
+					UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(MeasuringLocation[Triangle.X],
+					                                                    Origin - BoxExtent, Origin + BoxExtent,
+					                                                    FVector(0.0f), FVector(Size, 0)));
+				CanvasUVTriangle.V1_Pos = FVector2D(
+					UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(MeasuringLocation[Triangle.Y],
+					                                                    Origin - BoxExtent, Origin + BoxExtent,
+					                                                    FVector(0.0f), FVector(Size, 0)));
+				CanvasUVTriangle.V2_Pos = FVector2D(
+					UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(MeasuringLocation[Triangle.Z],
+					                                                    Origin - BoxExtent, Origin + BoxExtent,
+					                                                    FVector(0.0f), FVector(Size, 0)));
+				CanvasUVTriangle.V0_Color = FLinearColor::White;
+				CanvasUVTriangle.V1_Color = FLinearColor::White;
+				CanvasUVTriangle.V2_Color = FLinearColor::White;
+				CanvasUVTriangles.Emplace(CanvasUVTriangle);
+			}
+			Canvas->K2_DrawTriangle(nullptr, CanvasUVTriangles);
 		}
 	}
 }

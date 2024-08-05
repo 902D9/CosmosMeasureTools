@@ -56,4 +56,17 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosmos Measure Tools")
 	static bool IsPointInPolygon(const FVector& TestPoint, const TArray<FVector>& PolygonPoints);
+
+	/*
+	 * 向量 MapRangeClamped
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
+	static FVector VectorMapRangeClamped(FVector Value, FVector MinRange, FVector MaxRange, FVector MinOutput, FVector MaxOutput);
+
+	/*
+	 * 将多边形拆分成多个三角形 避免出现有多余/有空缺/有三角形重叠等情况
+	 * 简单处理
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
+	static void PolygonSplitsTriangles(UPARAM(ref) const TArray<FVector>& InVertices, TArray<FIntVector>& Triangles);
 };

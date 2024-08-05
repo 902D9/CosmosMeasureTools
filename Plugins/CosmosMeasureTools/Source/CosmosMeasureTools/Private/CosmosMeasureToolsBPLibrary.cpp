@@ -2,7 +2,7 @@
 
 #include "CosmosMeasureToolsBPLibrary.h"
 #include "CosmosMeasureTools.h"
-#include "Engine/Polys.h"
+#include "Polygon2.h"
 
 UCosmosMeasureToolsBPLibrary::UCosmosMeasureToolsBPLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -121,4 +121,65 @@ bool UCosmosMeasureToolsBPLibrary::IsPointInPolygon(const FVector& TestPoint, co
 		PolygonPoints2D.Emplace(FVector2D(PolygonPoints[PointIndex]));
 	}
 	return IsPointInPolygon2D(FVector2D(TestPoint), PolygonPoints2D);
+}
+
+FVector UCosmosMeasureToolsBPLibrary::VectorMapRangeClamped(const FVector Value, const FVector MinRange,
+                                                            const FVector MaxRange,
+                                                            const FVector MinOutput, const FVector MaxOutput)
+{
+	const float X = FMath::GetMappedRangeValueClamped(
+		FVector2D(MinRange.X, MaxRange.X), FVector2D(MinOutput.X, MaxOutput.X), Value.X);
+	const float Y = FMath::GetMappedRangeValueClamped(
+		FVector2D(MinRange.Y, MaxRange.Y), FVector2D(MinOutput.Y, MaxOutput.Y), Value.Y);
+	const float Z = FMath::GetMappedRangeValueClamped(
+		FVector2D(MinRange.Z, MaxRange.Z), FVector2D(MinOutput.Z, MaxOutput.Z), Value.Z);
+	return FVector(X, Y, Z);
+}
+
+void UCosmosMeasureToolsBPLibrary::PolygonSplitsTriangles(const TArray<FVector>& InVertices,
+                                                          TArray<FIntVector>& Triangles)
+{
+	Triangles.Empty();
+
+	const int VerticesNum = InVertices.Num();
+	if (VerticesNum >= 3) //至少存在一个三角形
+	{
+		// @todo: 5.1 FGeometryScriptVectorList
+		TPolygon2<float> Polygon;
+		for (const auto Point : InVertices)
+		{
+			FVector2D TmpPoint = FVector2D(Point.X, Point.Y);
+			FVector2D LastPointOfPolygon = Polygon.VertexCount() == 0
+				                               ? FVector2D(99999, 99999)
+				                               : FVector2D(Polygon[Polygon.VertexCount() - 1]);
+			if (FVector2D::Distance(LastPointOfPolygon, TmpPoint) > 1.0f) // 忽略与上一个点距离过近的点
+			{
+				Polygon.AppendVertex(TmpPoint);
+			}
+		}
+		int FailedTimes = 0;
+		while (Polygon.VertexCount() > 3)
+		{
+			for (int i = 0; i < Polygon.VertexCount(); i++)
+			{
+				const int Previous = (i + Polygon.VertexCount() - 1) % Polygon.VertexCount();
+				const int Next = (i + 1) % Polygon.VertexCount();
+				TSegment2<float> Line(FVector2D(Polygon[Previous].X, Polygon[Previous].Y),
+				                      FVector2D(Polygon[Next].X, Polygon[Next].Y));
+				Line = TSegment2<float>(Line.Center, Line.Direction, Line.Extent * 0.95); //短一点
+				if (Polygon.Contains(Line) || FailedTimes > VerticesNum * 5)
+				{
+					FIntVector T;
+					T = FIntVector(Previous, i, Next);
+					Triangles.Add(T);
+					Polygon.RemoveVertex(i);
+					break;
+				}
+				++FailedTimes;
+			}
+		}
+
+		const FIntVector T = FIntVector(0, 1, 2);
+		Triangles.Add(T);
+	}
 }
