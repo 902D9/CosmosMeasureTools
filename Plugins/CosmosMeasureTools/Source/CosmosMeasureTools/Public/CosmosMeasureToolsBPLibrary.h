@@ -61,7 +61,8 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 * 向量 MapRangeClamped
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	static FVector VectorMapRangeClamped(FVector Value, FVector MinRange, FVector MaxRange, FVector MinOutput, FVector MaxOutput);
+	static FVector VectorMapRangeClamped(FVector Value, FVector MinRange, FVector MaxRange, FVector MinOutput,
+	                                     FVector MaxOutput);
 
 	/*
 	 * 将多边形拆分成多个三角形 避免出现有多余/有空缺/有三角形重叠等情况
@@ -69,4 +70,16 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
 	static void PolygonSplitsTriangles(UPARAM(ref) const TArray<FVector>& InVertices, TArray<FIntVector>& Triangles);
+
+	/*
+	 * 将多边形拆分成多个三角形 避免出现有多余/有空缺/有三角形重叠等情况
+	 * 简单处理,支持凹多边形
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
+	static void PolygonSplitsTrianglesV2(UPARAM(ref) const TArray<FVector>& InVertices, TArray<FIntVector>& Triangles);
+
+	static void SplitPolygonIntoConvex(const TArray<FVector2D>& InVertices,
+	                                                          TArray<TArray<FVector2D>>& ConvexPolygons);
+	static void TriangulateConvexPolygon(const TArray<FVector2D>& InVertices,
+	                                                            TArray<FIntVector>& TriangleIndices);
 };

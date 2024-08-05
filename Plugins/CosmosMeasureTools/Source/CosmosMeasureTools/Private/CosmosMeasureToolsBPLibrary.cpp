@@ -208,3 +208,87 @@ void UCosmosMeasureToolsBPLibrary::PolygonSplitsTriangles(const TArray<FVector>&
 		Triangles.Add(T);
 	}
 }
+
+void UCosmosMeasureToolsBPLibrary::PolygonSplitsTrianglesV2(const TArray<FVector>& InVertices,
+                                                            TArray<FIntVector>& Triangles)
+{
+	// 清空输出数组
+	Triangles.Empty();
+
+	const int VerticesNum = InVertices.Num();
+	if (VerticesNum >= 3)
+	{
+		TArray<FVector2D> Vertices2D;
+		for (const auto& Point : InVertices)
+		{
+			Vertices2D.Add(FVector2D(Point.X, Point.Y));
+		}
+
+		// 分割多边形
+		TArray<TArray<FVector2D>> ConvexPolygons;
+		SplitPolygonIntoConvex(Vertices2D, ConvexPolygons);
+
+		// 三角化每个凸多边形
+		for (const auto& ConvexPolygon : ConvexPolygons)
+		{
+			TArray<FIntVector> TriangleIndices;
+			TriangulateConvexPolygon(ConvexPolygon, TriangleIndices);
+			Triangles.Append(TriangleIndices);
+		}
+	}
+}
+
+void UCosmosMeasureToolsBPLibrary::SplitPolygonIntoConvex(const TArray<FVector2D>& InVertices,
+														  TArray<TArray<FVector2D>>& ConvexPolygons)
+{
+	// 识别凹点
+	TArray<bool> IsConcave;
+	for (int i = 0; i < InVertices.Num(); ++i)
+	{
+		FVector2D A = InVertices[(i + InVertices.Num() - 1) % InVertices.Num()];
+		FVector2D B = InVertices[i];
+		FVector2D C = InVertices[(i + 1) % InVertices.Num()];
+		FVector2D AB = B - A;
+		FVector2D BC = C - B;
+		FVector2D NormalAB = FVector2D(-AB.Y, AB.X).GetSafeNormal();
+		FVector2D NormalBC = FVector2D(-BC.Y, BC.X).GetSafeNormal();
+		float Angle = FVector2D::DotProduct(NormalAB, NormalBC);
+		IsConcave.Add(Angle < 0);
+	}
+
+	// 分割多边形
+	TArray<FVector2D> CurrentPolygon = InVertices;
+	while (CurrentPolygon.Num() > 3)
+	{
+		bool FoundConcave = false;
+		for (int i = 0; i < CurrentPolygon.Num(); ++i)
+		{
+			if (IsConcave[i])
+			{
+				// 连接凹点与其相邻的凸点
+				TArray<FVector2D> NewPolygon1, NewPolygon2;
+				// ... 分割多边形的逻辑
+				ConvexPolygons.Add(NewPolygon1);
+				CurrentPolygon = NewPolygon2;
+				FoundConcave = true;
+				break;
+			}
+		}
+		if (!FoundConcave)
+		{
+			// 如果没有找到凹点，说明已经是凸多边形
+			ConvexPolygons.Add(CurrentPolygon);
+			break;
+		}
+	}
+}
+
+void UCosmosMeasureToolsBPLibrary::TriangulateConvexPolygon(const TArray<FVector2D>& InVertices,
+															TArray<FIntVector>& TriangleIndices)
+{
+	for (int i = 0; i < InVertices.Num() - 2; ++i)
+	{
+		TriangleIndices.Add(FIntVector(0, i + 1, i + 2));
+	}
+}
+
