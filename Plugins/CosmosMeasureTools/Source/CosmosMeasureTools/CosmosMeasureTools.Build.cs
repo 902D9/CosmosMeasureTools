@@ -39,7 +39,7 @@ public class CosmosMeasureTools : ModuleRules
 				"Slate",
 				"SlateCore",
 				"UMG", 
-				"GeometricObjects"
+				"GeometryCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

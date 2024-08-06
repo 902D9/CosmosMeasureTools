@@ -427,7 +427,7 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 			UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(this, CanvasRenderTarget,
 			                                                       Canvas, Size, Context);
 			TArray<FIntVector> Triangles;
-			UCosmosMeasureToolsBPLibrary::PolygonSplitsTrianglesV2(MeasuringLocation, Triangles);
+			// UCosmosMeasureToolsBPLibrary::PolygonSplitsTrianglesV2(MeasuringLocation, Triangles);
 			TArray<FCanvasUVTri> CanvasUVTriangles;
 			for (int i = 0; i < Triangles.Num(); i++)
 			{
