@@ -31,7 +31,7 @@ class UCosmosMeasureToolsBPLibrary : public UBlueprintFunctionLibrary
 	 * 传入两线段的点为 A B
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Cosmos Measure Tools")
-	static bool CheckWhetherTwoLineSegmentsIntersect2D(TArray<FVector2D> A, TArray<FVector2D> B);
+	static bool DoSegmentsIntersect(TArray<FVector2D> A, TArray<FVector2D> B);
 
 	/**
 	 * 计算多边形面积

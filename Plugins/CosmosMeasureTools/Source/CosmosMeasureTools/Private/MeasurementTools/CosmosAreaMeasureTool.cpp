@@ -290,7 +290,7 @@ bool ACosmosAreaMeasureTool::IsIntersectAnExistingLine(FVector InNewPointLocatio
 		const int NextIndex = i + 1 < MeasuringLocation.Num() ? i + 1 : 0;
 		if (i != PointIndex && NextIndex != PointIndex)
 		{
-			if (UCosmosMeasureToolsBPLibrary::CheckWhetherTwoLineSegmentsIntersect2D(
+			if (UCosmosMeasureToolsBPLibrary::DoSegmentsIntersect(
 				{FVector2D(IsIntersectAnExistingLineNewPointLocation), FVector2D(MeasuringLocation[PointIndex])},
 				{
 					FVector2D(MeasuringLocation[i]),

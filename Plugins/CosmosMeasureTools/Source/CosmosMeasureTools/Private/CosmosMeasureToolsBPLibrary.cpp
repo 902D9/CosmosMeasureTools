@@ -9,7 +9,7 @@ UCosmosMeasureToolsBPLibrary::UCosmosMeasureToolsBPLibrary(const FObjectInitiali
 {
 }
 
-bool UCosmosMeasureToolsBPLibrary::CheckWhetherTwoLineSegmentsIntersect2D(TArray<FVector2D> A, TArray<FVector2D> B)
+bool UCosmosMeasureToolsBPLibrary::DoSegmentsIntersect(TArray<FVector2D> A, TArray<FVector2D> B)
 {
 	// 参数验证 - 长度
 	if (A.Num() < 2 || B.Num() < 2)
@@ -239,7 +239,7 @@ void UCosmosMeasureToolsBPLibrary::PolygonSplitsTrianglesV2(const TArray<FVector
 }
 
 void UCosmosMeasureToolsBPLibrary::SplitPolygonIntoConvex(const TArray<FVector2D>& InVertices,
-														  TArray<TArray<FVector2D>>& ConvexPolygons)
+                                                          TArray<TArray<FVector2D>>& ConvexPolygons)
 {
 	// 识别凹点
 	TArray<bool> IsConcave;
@@ -267,11 +267,56 @@ void UCosmosMeasureToolsBPLibrary::SplitPolygonIntoConvex(const TArray<FVector2D
 			{
 				// 连接凹点与其相邻的凸点
 				TArray<FVector2D> NewPolygon1, NewPolygon2;
-				// ... 分割多边形的逻辑
-				ConvexPolygons.Add(NewPolygon1);
-				CurrentPolygon = NewPolygon2;
+
+				// 获取凹点及其相邻的凸点
+				FVector2D ConcavePoint = CurrentPolygon[i];
+				FVector2D ConvexPoint1 = CurrentPolygon[(i + CurrentPolygon.Num() - 1) % CurrentPolygon.Num()];
+				FVector2D ConvexPoint2 = CurrentPolygon[(i + 1) % CurrentPolygon.Num()];
+
+				// 检查连接凹点与相邻凸点的线段是否与多边形的其他边相交
+				bool Intersects = false;
+				for (int j = 0; j < CurrentPolygon.Num(); ++j)
+				{
+					if (j != i && j != (i + CurrentPolygon.Num() - 1) % CurrentPolygon.Num() && j != (i + 1) %
+						CurrentPolygon.Num())
+					{
+						FVector2D EdgeStart = CurrentPolygon[j];
+						FVector2D EdgeEnd = CurrentPolygon[(j + 1) % CurrentPolygon.Num()];
+						if (DoSegmentsIntersect({ConcavePoint, ConvexPoint1}, {EdgeStart, EdgeEnd}) ||
+							DoSegmentsIntersect({ConcavePoint, ConvexPoint2}, {EdgeStart, EdgeEnd}))
+						{
+							Intersects = true;
+							break;
+						}
+					}
+				}
+
+				// 如果不相交，则可以分割多边形
+				if (!Intersects)
+				{
+					// 分割多边形
+					NewPolygon1.Add(ConcavePoint);
+					NewPolygon1.Add(ConvexPoint1);
+					NewPolygon1.Add(ConvexPoint2);
+
+					// 移除凹点
+					CurrentPolygon.RemoveAt(i);
+
+					// 更新 IsConcave 数组
+					IsConcave.RemoveAt(i);
+					IsConcave.Insert(false, 2); // 插入两个凸点
+
+					// 添加新分割出的凸多边形
+					ConvexPolygons.Add(NewPolygon1);
+
+					// 递归处理剩余的多边形
+					SplitPolygonIntoConvex(CurrentPolygon, ConvexPolygons);
+
+					// 结束循环
+					return;
+				}
+				// 如果相交，则继续寻找下一个凹点
 				FoundConcave = true;
-				break;
 			}
 		}
 		if (!FoundConcave)
@@ -284,11 +329,69 @@ void UCosmosMeasureToolsBPLibrary::SplitPolygonIntoConvex(const TArray<FVector2D
 }
 
 void UCosmosMeasureToolsBPLibrary::TriangulateConvexPolygon(const TArray<FVector2D>& InVertices,
-															TArray<FIntVector>& TriangleIndices)
+                                                            TArray<FIntVector>& TriangleIndices)
 {
-	for (int i = 0; i < InVertices.Num() - 2; ++i)
+	// @todo: 累计Index
+	// 清空输出数组
+	TriangleIndices.Empty();
+
+	// 获取输入顶点的数量
+	const int VerticesNum = InVertices.Num();
+	// 如果顶点数量大于等于3，即至少能构成一个三角形
+	if (VerticesNum >= 3)
 	{
-		TriangleIndices.Add(FIntVector(0, i + 1, i + 2));
+		// @todo:传入顶点未按照多边形的顺序，需要先对顶点进行排序。但是实际不应该有这一步，传入时必须排好序
+		// @todo: 5.1 FGeometryScriptVectorList
+		// 创建一个二维多边形对象
+		TPolygon2<float> Polygon;
+		// 遍历输入的三维顶点，将其转换为二维顶点并添加到多边形中
+		for (const auto Point : InVertices)
+		{
+			FVector2D TmpPoint = FVector2D(Point.X, Point.Y);
+			// 获取当前点与多边形最后一个点的距离，如果距离过近则忽略该点
+			FVector2D LastPointOfPolygon = Polygon.VertexCount() == 0
+				                               ? FVector2D(99999, 99999)
+				                               : FVector2D(Polygon[Polygon.VertexCount() - 1]);
+			if (FVector2D::Distance(LastPointOfPolygon, TmpPoint) > 1.0f)
+			{
+				Polygon.AppendVertex(TmpPoint);
+			}
+		}
+		// 初始化失败次数
+		int FailedTimes = 0;
+		// 当多边形的顶点数量大于3时，尝试将其分割成三角形
+		while (Polygon.VertexCount() > 3)
+		{
+			// 遍历多边形的每个顶点
+			// for (int i = 0; i < Polygon.VertexCount(); i++)
+			for (int i = Polygon.VertexCount() - 1; i >= 0; --i) // 逆序遍历多边形顶点，删除顶点时，循环索引不会受到影响。
+			{
+				// 获取当前顶点的前一个和后一个顶点的索引
+				const int Previous = (i + Polygon.VertexCount() - 1) % Polygon.VertexCount();
+				const int Next = (i + 1) % Polygon.VertexCount();
+				// 创建当前顶点与前后顶点构成的线段
+				TSegment2<float> Line(FVector2D(Polygon[Previous].X, Polygon[Previous].Y),
+				                      FVector2D(Polygon[Next].X, Polygon[Next].Y));
+
+				// **注释**: 为了确保线段完全位于多边形内部，减少因浮点数精度问题导致的误判，
+				// 将线段缩短5%，以提高算法的鲁棒性。
+				Line = TSegment2<float>(Line.Center, Line.Direction, Line.Extent * 0.95);
+
+				// 如果线段完全在多边形内部，或者尝试次数过多，则将三个顶点索引添加到输出数组，并移除当前顶点
+				if (Polygon.Contains(Line) || FailedTimes > VerticesNum * 5)
+				{
+					FIntVector T;
+					T = FIntVector(Previous, i, Next);
+					TriangleIndices.Add(T);
+					Polygon.RemoveVertex(i);
+					break;
+				}
+				// 增加失败次数
+				++FailedTimes;
+			}
+		}
+		// 对于剩余的三个顶点，直接构成一个三角形并添加到输出数组
+		const FIntVector T = FIntVector(0, 1, 2);
+		TriangleIndices.Add(T);
 	}
 }
-
