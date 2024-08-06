@@ -18,12 +18,12 @@
 		{
 			"Name": "CosmosMeasureTools",
 			"Type": "Runtime",
-			"LoadingPhase": "PreLoadingScreen"
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
 		{
-			"Name": "GeometryProcessing",
+			"Name": "GeometryScripting",
 			"Enabled": true
 		},
 		{

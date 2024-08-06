@@ -5,7 +5,10 @@
 
 #include "CosmosMeasureToolsBPLibrary.h"
 #include "Engine/Canvas.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "GeometryScript/ListUtilityFunctions.h"
+#include "GeometryScript/MeshPrimitiveFunctions.h"
+#include "GeometryScript/MeshPrimitiveFunctions.h"
+#include "GeometryScript/MeshQueryFunctions.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "MeasurementTools/CosmosMeasureToolCableComponent.h"
 #include "MeasurementTools/CosmosMeasureToolSphereComponent.h"
@@ -426,12 +429,23 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 			FDrawToRenderTargetContext Context;
 			UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(this, CanvasRenderTarget,
 			                                                       Canvas, Size, Context);
-			TArray<FIntVector> Triangles;
-			// UCosmosMeasureToolsBPLibrary::PolygonSplitsTrianglesV2(MeasuringLocation, Triangles);
+			UDynamicMesh* TempDynamicMesh = AllocateComputeMesh();
+			FGeometryScriptPrimitiveOptions PrimitiveOptions;
+			FTransform Transform;
+			TArray<FVector2D> PolygonVertices = TArray<FVector2D>(MeasuringLocation);
+			UGeometryScriptLibrary_MeshPrimitiveFunctions::AppendTriangulatedPolygon(
+				TempDynamicMesh, PrimitiveOptions, Transform, PolygonVertices);
+			FGeometryScriptTriangleList TriangleList;
+			bool bHasTriangleIDGaps;
+			UGeometryScriptLibrary_MeshQueryFunctions::GetAllTriangleIndices(
+				TempDynamicMesh, TriangleList, false, bHasTriangleIDGaps);
+			TArray<FIntVector> TriangleArray;
+			UGeometryScriptLibrary_ListUtilityFunctions::ConvertTriangleListToArray(TriangleList, TriangleArray);
+			ReleaseAllComputeMeshes();
 			TArray<FCanvasUVTri> CanvasUVTriangles;
-			for (int i = 0; i < Triangles.Num(); i++)
+			for (int i = 0; i < TriangleArray.Num(); i++)
 			{
-				const FIntVector& Triangle = Triangles[i];
+				const FIntVector& Triangle = TriangleArray[i];
 				UE_LOG(LogTemp, Log, TEXT("Triangle %d %d %d"), Triangle.X, Triangle.Y, Triangle.Z)
 				FCanvasUVTri CanvasUVTriangle;
 				CanvasUVTriangle.V0_Pos = FVector2D(
