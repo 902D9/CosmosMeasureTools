@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GeometryFramework/Public/DynamicMeshActor.h"
 #include "CosmosMeasureTool.generated.h"
 
 UENUM(BlueprintType)
@@ -29,7 +29,7 @@ class UCosmosMeasureToolSphereComponent;
 class UCosmosMeasureToolCableComponent;
 
 UCLASS(Abstract, Blueprintable, ClassGroup="Cosmos Measurement Tools")
-class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public AActor
+class COSMOSMEASURETOOLS_API ACosmosMeasureTool : public ADynamicMeshActor
 {
 	GENERATED_BODY()
 
@@ -45,9 +45,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	APlayerController* PlayerController;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	USceneComponent* Root;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UCosmosMeasureToolSphereComponent* PreviewSphere;
 
