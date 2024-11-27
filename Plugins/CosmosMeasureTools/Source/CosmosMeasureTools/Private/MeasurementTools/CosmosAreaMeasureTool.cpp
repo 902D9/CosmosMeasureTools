@@ -4,6 +4,7 @@
 #include "MeasurementTools/CosmosAreaMeasureTool.h"
 
 #include "CosmosMeasureToolsBPLibrary.h"
+#include "Components/DecalComponent.h"
 #include "Engine/Canvas.h"
 #include "GeometryScript/ListUtilityFunctions.h"
 #include "GeometryScript/MeshPrimitiveFunctions.h"
@@ -26,6 +27,12 @@ ACosmosAreaMeasureTool::ACosmosAreaMeasureTool(const FObjectInitializer& ObjectI
 	CanvasMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(nullptr,TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
 	CanvasMesh->SetStaticMesh(MeshAsset);
+
+	CanvasDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("CanvasMaterial"));
+	CanvasDecal->SetupAttachment(RootComponent);
+	CanvasDecal->SetVisibility(false);
+	CanvasDecal->SetRelativeRotation(FRotator(-90, 0, 0));
+	CanvasDecal->DecalSize = FVector(100);
 }
 
 void ACosmosAreaMeasureTool::BeginPlay()
@@ -37,6 +44,7 @@ void ACosmosAreaMeasureTool::BeginPlay()
 		nullptr,TEXT("Material'/CosmosMeasureTools/Materials/Master/M_MeasureAreaMask.M_MeasureAreaMask'"));
 	CanvasMaterial = UMaterialInstanceDynamic::Create(MaterialAsset, this);
 	CanvasMesh->SetMaterial(0, CanvasMaterial);
+	CanvasDecal->SetMaterial(0, CanvasMaterial);
 	CanvasRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1024, RTF_RGBA16f,
 	                                                                   FLinearColor(0, 0, 0, 0));
 	CanvasMaterial->SetTextureParameterValue("CanvasTexture", CanvasRenderTarget);
@@ -71,10 +79,7 @@ void ACosmosAreaMeasureTool::PreviewLastPointAndCable()
 	FHitResult HitResult; // 因为是在 Tick 中调用，所以 HitResult.Location 不需要应用世界坐标偏移
 	if (GetHitResultUnderMouse(HitResult))
 	{
-		// 限制在一个平面
-		// @todo: 直接修改Z值会让预览点的位置不除在鼠标处
-		PreviewPointLocation = FVector(HitResult.Location.X, HitResult.Location.Y,
-		                               MeasuringLocation.Num() == 0 ? HitResult.Location.Z : MeasurePlaneZ);
+		PreviewPointLocation = HitResult.Location;
 		PreviewSphere->SetWorldLocation(PreviewPointLocation); // 球体位置
 		PreviewPointRelativeLocation = GetActorTransform().InverseTransformPosition(PreviewPointLocation);
 		// Cable仅预览前三个点
@@ -115,8 +120,7 @@ void ACosmosAreaMeasureTool::PickAndPlacePointByMouse()
 	{
 		if (GetHitResultUnderMouse(PickAndPlacePointByMouseHitResult))
 		{
-			PickedLocation = FVector(PickAndPlacePointByMouseHitResult.Location.X,
-			                         PickAndPlacePointByMouseHitResult.Location.Y, MeasurePlaneZ);
+			PickedLocation = PickAndPlacePointByMouseHitResult.Location;
 			// 更新拾取到点的位置
 			PickedSphere->SetWorldLocation(PickedLocation);
 			const int32 Index = MeasuringPoints.Find(PickedSphere);
@@ -148,8 +152,7 @@ void ACosmosAreaMeasureTool::PickAndPlacePointByMouse()
 			if (!PickedSphere) // 没有点击到已存在的点
 			{
 				// 添加点
-				PickedLocation = FVector(PickAndPlacePointByMouseHitResult.Location.X,
-				                         PickAndPlacePointByMouseHitResult.Location.Y, MeasurePlaneZ);
+				PickedLocation = PickAndPlacePointByMouseHitResult.Location;
 				UCosmosMeasureToolSphereComponent* Point = NewObject<UCosmosMeasureToolSphereComponent>(this);
 				Point->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 				Point->SetWorldLocation(PickedLocation);
@@ -353,11 +356,11 @@ void ACosmosAreaMeasureTool::ClearAll_Implementation()
 {
 	Super::ClearAll_Implementation();
 	CanvasMesh->SetVisibility(false);
+	CanvasDecal->SetVisibility(false);
 }
 
 void ACosmosAreaMeasureTool::AddMeasuringPoint_Implementation()
 {
-	// Super::AddMeasuringPoint_Implementation();
 	if (bMeasuring)
 	{
 		// 前三个点正常绘制
@@ -419,10 +422,13 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 			// 绘制面积填充
 			FVector Origin, BoxExtent;
 			UCosmosMeasureToolsBPLibrary::GetBoundOfPolygon(MeasuringLocation, Origin, BoxExtent);
-			CanvasMesh->SetWorldLocation(Origin);
-			const FVector Scale = BoxExtent * 0.01f * 2.0f;
-			CanvasMesh->SetWorldScale3D(FVector(Scale.X, Scale.Y, 1.0f));
-			CanvasMesh->SetVisibility(true);
+			FVector Scale = BoxExtent * 0.01f;
+			// CanvasMesh->SetWorldLocation(Origin);
+			// CanvasMesh->SetWorldScale3D(FVector(Scale.X, Scale.Y, 1.0f) * 2.0f);
+			// CanvasMesh->SetVisibility(true);
+			CanvasDecal->SetWorldLocation(Origin);
+			CanvasDecal->SetWorldScale3D(FVector(FMath::Max(Scale.X, 1), Scale.Y, Scale.X));
+			CanvasDecal->SetVisibility(true);
 			UKismetRenderingLibrary::ClearRenderTarget2D(this, CanvasRenderTarget, FLinearColor(0, 0, 0, 0));
 			UCanvas* Canvas;
 			FVector2D Size;

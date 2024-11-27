@@ -71,10 +71,14 @@ protected:
 	bool IsIntersectAnExistingLine(FVector InNewPointLocation, int32 PointIndex);
 
 private:
-	// 绘制面积填充的画布
+	// // 绘制面积填充的画布
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
 	UStaticMeshComponent* CanvasMesh;
+	// 绘制面积填充的画布
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
+		meta = (AllowPrivateAccess="true"))
+	UDecalComponent* CanvasDecal;
 	// 绘制面积填充的材质
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
