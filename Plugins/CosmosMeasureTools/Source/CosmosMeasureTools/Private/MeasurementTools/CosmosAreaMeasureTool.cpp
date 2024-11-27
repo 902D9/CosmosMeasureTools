@@ -8,7 +8,6 @@
 #include "Engine/Canvas.h"
 #include "GeometryScript/ListUtilityFunctions.h"
 #include "GeometryScript/MeshPrimitiveFunctions.h"
-#include "GeometryScript/MeshPrimitiveFunctions.h"
 #include "GeometryScript/MeshQueryFunctions.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "MeasurementTools/CosmosMeasureToolCableComponent.h"
@@ -45,10 +44,10 @@ void ACosmosAreaMeasureTool::BeginPlay()
 	CanvasMaterial = UMaterialInstanceDynamic::Create(MaterialAsset, this);
 	CanvasMesh->SetMaterial(0, CanvasMaterial);
 	CanvasDecal->SetMaterial(0, CanvasMaterial);
-	CanvasRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1024, RTF_RGBA16f,
+	CanvasRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 4096, 4096, RTF_RGBA16f,
 	                                                                   FLinearColor(0, 0, 0, 0));
 	CanvasMaterial->SetTextureParameterValue("CanvasTexture", CanvasRenderTarget);
-	CanvasMaterial->SetVectorParameterValue("Color", FLinearColor::Red);
+	CanvasMaterial->SetVectorParameterValue("Color", CanvasColor);
 }
 
 void ACosmosAreaMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
@@ -60,7 +59,6 @@ void ACosmosAreaMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWor
 	       *PickAndPlacePointByMouseHitResult.Location.ToString(), *PickedLocation.ToString(),
 	       *NewSaveNewPointLocation.ToString(), *IsIntersectAnExistingLineNewPointLocation.ToString(),
 	       *NewPointLocation.ToString());
-	MeasurePlaneZ += InOffset.Z;
 	PickAndPlacePointByMouseHitResult.Location += InOffset;
 	PickedLocation += InOffset;
 	NewSaveNewPointLocation += InOffset;
@@ -408,13 +406,6 @@ void ACosmosAreaMeasureTool::GetMeasureResult()
 	Super::GetMeasureResult();
 	if (bMeasuring)
 	{
-		if (MeasuringLocation.Num() == 1)
-		{
-			if (bIsFirstPointAfterStartMeasuring)
-			{
-				MeasurePlaneZ = MeasuringLocation[0].Z;
-			}
-		}
 		if (MeasuringLocation.Num() > 2)
 		{
 			MeasuredArea = UCosmosMeasureToolsBPLibrary::MeasurePolyArea(MeasuringLocation) / 10000.0f;

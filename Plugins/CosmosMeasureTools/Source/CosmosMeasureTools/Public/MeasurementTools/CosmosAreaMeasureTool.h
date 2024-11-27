@@ -38,9 +38,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	FVector NewPointLocation;
 
-	// 由第一个点确定得到测量平面 - Z值
-	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
-	float MeasurePlaneZ = 0.0f;
 	// 测量得到的面积
 	UPROPERTY(BlueprintReadOnly, Category = "Cosmos Measurement Tools")
 	float MeasuredArea = 0.0f;
@@ -71,7 +68,7 @@ protected:
 	bool IsIntersectAnExistingLine(FVector InNewPointLocation, int32 PointIndex);
 
 private:
-	// // 绘制面积填充的画布
+	// 绘制面积填充的画布
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
 	UStaticMeshComponent* CanvasMesh;
@@ -82,11 +79,16 @@ private:
 	// 绘制面积填充的材质
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
-	 UMaterialInstanceDynamic* CanvasMaterial;
+	UMaterialInstanceDynamic* CanvasMaterial;
 	// 绘制面积填充的渲染对象
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
 	UTextureRenderTarget2D* CanvasRenderTarget;
+
+	// 填充的颜色
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components",
+		meta = (AllowPrivateAccess="true", ExposeOnSpawn))
+	FLinearColor CanvasColor = FLinearColor::Red;
 
 public:
 	// Called every frame
@@ -95,7 +97,7 @@ public:
 	virtual void StartMeasuring(bool bMeasureComplex, float Distance,
 	                            TEnumAsByte<ECollisionChannel> ChannelToTrace) override;
 	virtual void StopMeasuring() override;
-	virtual  void ClearAll_Implementation() override;
+	virtual void ClearAll_Implementation() override;
 	virtual void AddMeasuringPoint_Implementation() override;
 	virtual void GetMeasureResult() override;
 

@@ -39,7 +39,7 @@ void ACosmosDistanceMeasureTool::GetMeasureResult()
 {
 	Super::GetMeasureResult();
 	// 测量中 && 不是开始测量后的第一个点 && 存在至少两个点
-	if (bMeasuring && !bIsFirstPointAfterStartMeasuring && MeasuringLocation.IsValidIndex(1))
+	if (bMeasuring && (!bIsFirstPointAfterStartMeasuring || MeasuringLocation.IsValidIndex(1)))
 	{
 		const FVector LastTwoPoint = MeasuringLocation.Last() - MeasuringLocation.Last(1);
 		MeasuredDistance.Add(LastTwoPoint.Size() / 100.0f);
