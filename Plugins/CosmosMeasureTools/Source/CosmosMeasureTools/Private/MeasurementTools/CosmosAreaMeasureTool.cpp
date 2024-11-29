@@ -39,15 +39,18 @@ void ACosmosAreaMeasureTool::BeginPlay()
 	Super::BeginPlay();
 
 	// 创建动态材质示例
-	UMaterial* MaterialAsset = LoadObject<UMaterial>(
-		nullptr,TEXT("Material'/CosmosMeasureTools/Materials/Master/M_MeasureAreaMask.M_MeasureAreaMask'"));
-	CanvasMaterial = UMaterialInstanceDynamic::Create(MaterialAsset, this);
-	CanvasMesh->SetMaterial(0, CanvasMaterial);
-	CanvasDecal->SetMaterial(0, CanvasMaterial);
+	if (!CanvasMaterial)
+	{
+		CanvasMaterial = LoadObject<UMaterial>(
+			nullptr,TEXT("Material'/CosmosMeasureTools/Materials/Master/M_MeasureAreaMask.M_MeasureAreaMask'"));
+	}
+	CanvasMaterialInst = UMaterialInstanceDynamic::Create(CanvasMaterial, this);
+	CanvasMesh->SetMaterial(0, CanvasMaterialInst);
+	CanvasDecal->SetMaterial(0, CanvasMaterialInst);
 	CanvasRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 4096, 4096, RTF_RGBA16f,
 	                                                                   FLinearColor(0, 0, 0, 0));
-	CanvasMaterial->SetTextureParameterValue("CanvasTexture", CanvasRenderTarget);
-	CanvasMaterial->SetVectorParameterValue("Color", CanvasColor);
+	CanvasMaterialInst->SetTextureParameterValue("CanvasTexture", CanvasRenderTarget);
+	CanvasMaterialInst->SetVectorParameterValue("Color", CanvasColor);
 }
 
 void ACosmosAreaMeasureTool::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)

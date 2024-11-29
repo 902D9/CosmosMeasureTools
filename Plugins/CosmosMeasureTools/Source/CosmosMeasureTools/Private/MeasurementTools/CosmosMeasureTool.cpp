@@ -13,7 +13,7 @@ ACosmosMeasureTool::ACosmosMeasureTool(const FObjectInitializer& ObjectInitializ
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	SetIsSpatiallyLoaded(false);
+	// SetIsSpatiallyLoaded(false);
 	
 	PreviewSphere = CreateDefaultSubobject<UCosmosMeasureToolSphereComponent>(TEXT("PreviewSphere"));
 	PreviewSphere->SetupAttachment(RootComponent);

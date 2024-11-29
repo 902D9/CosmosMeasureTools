@@ -79,10 +79,12 @@ private:
 	// 绘制面积填充的材质
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
 		meta = (AllowPrivateAccess="true"))
-	UMaterialInstanceDynamic* CanvasMaterial;
+	UMaterialInterface* CanvasMaterial;
+	// 绘制面积填充的材质
+	UPROPERTY(BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess="true"))
+	UMaterialInstanceDynamic* CanvasMaterialInst;
 	// 绘制面积填充的渲染对象
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components",
-		meta = (AllowPrivateAccess="true"))
+	UPROPERTY(BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess="true"))
 	UTextureRenderTarget2D* CanvasRenderTarget;
 
 	// 填充的颜色
